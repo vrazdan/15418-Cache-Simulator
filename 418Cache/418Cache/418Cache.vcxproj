@@ -80,6 +80,7 @@
     <ClInclude Include="Cache.h" />
     <ClInclude Include="CacheConstants.h" />
     <ClInclude Include="CacheController.h" />
+    <ClInclude Include="CacheJob.h" />
     <ClInclude Include="CacheLine.h" />
     <ClInclude Include="CacheSet.h" />
     <ClInclude Include="CacheStats.h" />
@@ -90,6 +91,7 @@
     <ClCompile Include="Cache.cpp" />
     <ClCompile Include="CacheConstants.cpp" />
     <ClCompile Include="CacheController.cpp" />
+    <ClCompile Include="CacheJob.cpp" />
     <ClCompile Include="CacheLine.cpp" />
     <ClCompile Include="CacheSet.cpp" />
     <ClCompile Include="CacheStats.cpp" />

@@ -3,6 +3,7 @@
 #include "CacheController.h"	
 #include "CacheSet.h"
 #include "vector"
+#include "CacheJob.h"
 
 /*
 So this is the main class for handling a processors cache.
@@ -18,7 +19,30 @@ and more.
 
 CacheConstants cacheConstants;
 std::vector<CacheSet*> localCache; 
+CacheJob currentJob;
 int processorId;
+
+/*
+so every tick call,
+if not currently executing a job
+see if there are job son the queue
+if so, take a job off the queue
+see if we can service the job without having to do a bus access
+	taking into account what the current job on the bus is
+if so, "service" the job
+
+if we can't service w/o bus access
+try to get access
+	if we can't get access, then stall 
+		(we do not support instruction reordering)
+	if we can get access
+		get access
+		issue our command on the bus 
+			will have to implement a bus command
+		TODO: from here, actually talk about how to deal with timing and shit
+
+*/
+
 
 
 
@@ -38,7 +62,7 @@ int Cache::getProcessorId(){
 	return processorId;
 }
 
-void Cache::handleRequest(char readWrite, unsigned long long address, int threadId){
+void Cache::handleRequest(CacheJob job){
 	/*
 	1st add instruction to queue
 	*/

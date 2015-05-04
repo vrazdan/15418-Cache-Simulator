@@ -5,6 +5,7 @@
 #include <fstream>
 #include "CacheConstants.h"
 #include "Cache.h"
+#include <queue>
 
 CacheController::CacheController(void)
 {
@@ -27,6 +28,10 @@ int main(int argc, char* argv[]){
 	std::string line;
 	int x = constants.getNumLinesInSet();
 	Cache* caches = (Cache*)malloc(constants.getNumProcessors() * sizeof(Cache));
+	//keep track of all jobs that the processors have to do
+	//TODO: may have to break up into smaller chunks if when running larger traces, run out of memory
+	std::vector<std::queue<CacheJob>> outstandingRequests (numProcessors); 
+
 
 
 
@@ -72,10 +77,20 @@ int main(int argc, char* argv[]){
 
 
 		*/
+
+		/*
+		so fill in the queue for each processor
+		send the queue to each processor as a part of the constructor
+		then at the end of processing the file, call a fxn for each processor
+		saying start processing
+
+		we can check when they have all finished when all the queue sizes are 0 (but we're going to be looping anyways for cycles
+		so it's all good)
+		*/
 		
 
 
-		caches[accessProcessorId].handleRequest(readWrite, address, threadId);
+
 
 
 		printf("rw:%c addr:%llX threadId:%d \n", readWrite, address, threadId);
