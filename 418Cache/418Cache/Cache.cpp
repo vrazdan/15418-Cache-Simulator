@@ -6,6 +6,7 @@
 #include "CacheJob.h"
 #include "queue"
 #include "BusRequest.h"
+#include <math.h> 
 
 /*
 So this is the main class for handling a processors cache.
@@ -73,6 +74,20 @@ int Cache::getProcessorId(){
 bool inModifiedState(){
 	unsigned long long addr = (*currentJob).getAddress();
 	unsigned long long setMask = (-1 << (cacheConstants.getNumSetBits() + cacheConstants.getNumBytesBits()));
+
+}
+
+void decode_address(unsigned long long address, int* whichSet, int* whichLine)
+{
+
+	int numSetBits = cacheConstants.getNumSetBits();
+	int numBytesBits = cacheConstants.getNumBytesBits();
+
+	unsigned long long currSet = (address >> numBytesBits) & ((1 << numSetBits)-1);
+	unsigned long long currLine = (address >> numBytesBits;
+
+	*whichSet = currSet;
+	*whichLine = currline;
 
 }
 
