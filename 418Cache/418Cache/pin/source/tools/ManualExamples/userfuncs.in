@@ -1,0 +1,10 @@
+make_array_and_return_value
+PrintHello
+parallelQuicksort
+parallelQuicksortHelper
+swap
+partition
+quicksortHelper
+quicksort
+isSorted
+access_array
