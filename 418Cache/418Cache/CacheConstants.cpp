@@ -56,7 +56,8 @@ int CacheConstants::getNumBytesInLine(){
 int CacheConstants::getNumCacheSize(){
 	return numCacheSize;
 }
-int CacheConstants::getCycle(){
+
+unsigned long long CacheConstants::getCycle(){
 	return cycles;
 }
 

@@ -4,6 +4,8 @@
 #include "CacheSet.h"
 #include "vector"
 #include "CacheJob.h"
+#include "queue"
+#include "BusRequest.h"
 
 /*
 So this is the main class for handling a processors cache.
@@ -19,8 +21,11 @@ and more.
 
 CacheConstants cacheConstants;
 std::vector<CacheSet*> localCache; 
-CacheJob currentJob;
+std::queue<CacheJob*> pendingJobs;
+CacheJob* currentJob;
+BusRequest* busRequest;
 int processorId;
+bool haveBusRequest;
 
 /*
 so every tick call,
@@ -46,7 +51,7 @@ try to get access
 
 
 
-Cache::Cache(int pId, CacheConstants consts)
+Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*> jobQueue)
 {
 	cacheConstants = consts;
 	//make a vector of the CacheSet 
@@ -54,25 +59,83 @@ Cache::Cache(int pId, CacheConstants consts)
 	for(int i = 0; i < cacheConstants.getNumSets(); i++){
 		localCache[i] = new CacheSet(&consts);
 	}
-
 	processorId = pId;
+	pendingJobs = jobQueue;
+	currentJob = NULL;
+	busRequest = NULL;
+	haveBusRequest = false;
 }
 
 int Cache::getProcessorId(){
 	return processorId;
 }
 
-void Cache::handleRequest(CacheJob job){
-	/*
-	1st add instruction to queue
-	*/
-	
+void Cache::handleRequest(){
+	if (currentJob == NULL){
+		//so there are still jobs and we're not doing one right now
+		if(!pendingJobs.empty()){
+			currentJob = pendingJobs.front();
+			pendingJobs.pop();
+
+			if((*currentJob).isWrite()){
+				//pId, bus command (BusRdX, BusRd
+				busRequest = new BusRequest();
+
+
+
+			/*
+			1) see if it's a write job
+				if so, we need bus access
+				so make a busrequest obj and set busreqneeded to true
+			2) if it's a read
+				check to see if we have it already in the local cache
+				in a modified / shared state
+				if so, we good
+			3) if invalid
+				make a busrequest obj so that we can get the data
+				set busreqneed to true
+				*/
+
+		}
+	}
+}
+
+//return True if we have an outstanding bus request to issue, false otherwise
+bool Cache::hasBusRequest(){
+
 
 }
 
-Cache::~Cache(void){
-	for(int i = 0; i < cacheConstants.getNumSets(); i++){
-		delete localCache[i];
-	}
+//from parsing the current memory job, 
+//if it needs to get access to the bus, make the obj and return it here
+//when the bus calls on us
+BusRequest Cache::getBusRequest(){
 
+}
+
+/*
+Read the current BusRequest that another cache issued to the bus
+and parse it to see if you need to update our own local cache
+*/
+void Cache::snoopBusRequest(BusRequest request){
+
+}
+
+
+
+/*
+Delete current job
+Look at queue if there is another job for us to do
+if there is-> handleRequest()
+otherwise, maybe have a function to notify the CacheController that we're done?
+*/
+void Cache::busJobDone(){
+
+}
+
+void Cache::tick(){
+}
+
+Cache::~Cache(void){
+	
 }

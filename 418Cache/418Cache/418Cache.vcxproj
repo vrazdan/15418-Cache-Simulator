@@ -77,6 +77,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AtomicBusManager.h" />
+    <ClInclude Include="BusRequest.h" />
     <ClInclude Include="Cache.h" />
     <ClInclude Include="CacheConstants.h" />
     <ClInclude Include="CacheController.h" />
@@ -88,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AtomicBusManager.cpp" />
+    <ClCompile Include="BusRequest.cpp" />
     <ClCompile Include="Cache.cpp" />
     <ClCompile Include="CacheConstants.cpp" />
     <ClCompile Include="CacheController.cpp" />

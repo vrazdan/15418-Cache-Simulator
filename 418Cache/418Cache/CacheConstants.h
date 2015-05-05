@@ -10,7 +10,7 @@ public:
 	int getNumLinesInSet();
 	int getNumBytesInLine();
 	int getNumCacheSize();
-	int getCycle();
+	unsigned long long getCycle();
 	void incrementCycle();
 
 

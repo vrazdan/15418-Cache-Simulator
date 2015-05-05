@@ -5,6 +5,9 @@ char rW;
 unsigned long long address;
 int threadId;
 
+CacheJob::CacheJob(){
+}
+
 CacheJob::CacheJob(char readWrite, unsigned long long addr, int tId)
 {
 	rW = readWrite;

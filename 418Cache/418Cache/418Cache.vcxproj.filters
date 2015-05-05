@@ -42,6 +42,9 @@
     <ClInclude Include="CacheJob.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BusRequest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CacheController.cpp">
@@ -66,6 +69,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CacheJob.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BusRequest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
