@@ -6,6 +6,8 @@
 #include "CacheConstants.h"
 #include "Cache.h"
 #include <queue>
+#include "AtomicBusManager.h"
+
 
 CacheController::CacheController(void)
 {
@@ -17,6 +19,16 @@ CacheController::~CacheController(void)
 }
 
 
+bool queuesEmpty(std::vector<std::queue<CacheJob*>> requests, int numProcessors){
+	bool allEmpty = true;
+	for(int i = 0; i < numProcessors; i++){
+		if(!requests[i].empty()){
+			allEmpty = false;
+		}
+	}
+	return allEmpty;
+}
+
 int main(int argc, char* argv[]){
 	CacheConstants constants;
 	//local var so don't have to do an object reference each time
@@ -26,7 +38,7 @@ int main(int argc, char* argv[]){
 	unsigned long long address = 0;
 	unsigned int threadId = 0;
 	std::string line;
-
+	AtomicBusManager* bus;
 	std::vector<Cache*> caches (numProcessors);
 
 	//keep track of all jobs that the processors have to do
@@ -66,15 +78,23 @@ int main(int argc, char* argv[]){
 		printf("rw:%c addr:%llX threadId:%d \n", readWrite, address, threadId);
 	}
 	//so now all queues are full with the jobs they need to run
+	bus = new AtomicBusManager(constants, caches);
 
-	//time must first increment for the constants
-	//then call for all the caches
-	//then call the bus manager
+	while(!queuesEmpty(outstandingRequests, numProcessors)){
 	
+		//time must first increment for the constants
+		constants.tick();
+		//then call for all the caches
+		for(int i = 0; i < numProcessors; i++){
+			(*caches[i]).tick();
+		}
+		//then call the bus manager
+		(*bus).tick();
 
+	}
 
-
-
+	printf("yo we done ayyy");
+	
 
 	for(int i = 0; i < numProcessors; i++){
 		delete caches[i];

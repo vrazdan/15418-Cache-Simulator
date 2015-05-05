@@ -70,6 +70,12 @@ int Cache::getProcessorId(){
 	return processorId;
 }
 
+bool inModifiedState(){
+	unsigned long long addr = (*currentJob).getAddress();
+	unsigned long long setMask = (-1 << (cacheConstants.getNumSetBits() + cacheConstants.getNumBytesBits()));
+
+}
+
 void Cache::handleRequest(){
 	if (currentJob == NULL){
 		//so there are still jobs and we're not doing one right now
@@ -78,15 +84,29 @@ void Cache::handleRequest(){
 			pendingJobs.pop();
 
 			if((*currentJob).isWrite()){
-				//pId, bus command (BusRdX, BusRd
-				busRequest = new BusRequest();
+
+				//so if in the MSI protocol
+				if(cacheConstants.getProtocol().c_str() == "MSI"){
+					if(inModifiedState()){
+
+					}
+
+				}
+
+
+			}
+
+
+
+
+				//pId, bus command (BusRdX, BusRd), line
 
 
 
 			/*
 			1) see if it's a write job
-				if so, we need bus access
-				so make a busrequest obj and set busreqneeded to true
+				if so,see if we need access
+					if we need access make a busrequest obj and set busreqneeded to true
 			2) if it's a read
 				check to see if we have it already in the local cache
 				in a modified / shared state
@@ -102,8 +122,7 @@ void Cache::handleRequest(){
 
 //return True if we have an outstanding bus request to issue, false otherwise
 bool Cache::hasBusRequest(){
-
-
+	return haveBusRequest;
 }
 
 //from parsing the current memory job, 

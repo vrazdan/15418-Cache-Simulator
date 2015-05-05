@@ -11,7 +11,10 @@ public:
 	int getNumBytesInLine();
 	int getNumCacheSize();
 	unsigned long long getCycle();
-	void incrementCycle();
+	void tick();
+	std::string getProtocol();
+	int getNumBytesBits();
+	int getNumSetBits();
 
 
 	~CacheConstants(void);
