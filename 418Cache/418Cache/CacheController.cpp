@@ -65,7 +65,6 @@ int main(int argc, char* argv[]){
 	}
 	
 
-	std::queue<CacheJob*> tempQueue;
 	while(getline(tracefile, line)){
 		//so while there are lines to read from the trace
 		sscanf(line.c_str(), "%c %llx %u", &readWrite, &address, &threadId);
@@ -73,8 +72,7 @@ int main(int argc, char* argv[]){
 		//so accessProcessorId is now the # of the cache that is responsible
 		//for this thread
 
-		tempQueue = outstandingRequests.at(accessProcessorId);
-		tempQueue.push(new CacheJob(readWrite, address, threadId));
+		outstandingRequests.at(accessProcessorId).push(new CacheJob(readWrite, address, threadId));
 		printf("rw:%c addr:%llX threadId:%d \n", readWrite, address, threadId);
 	}
 	//so now all queues are full with the jobs they need to run

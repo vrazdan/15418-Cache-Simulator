@@ -9,7 +9,7 @@
 //current cache that had/has bus access
 int currentCache;
 //current bus request being served
-BusRequest currentRequest;
+BusRequest* currentRequest;
 bool inUse;
 //which cycle we started a job on
 unsigned long long startCycle; 
@@ -33,8 +33,8 @@ void AtomicBusManager::tick(){
 	
 	if(inUse){
 		//so the current job being executed is completed this cycle 
-				//assume global cycle count is accurate at this time
-		if(startCycle + currentJob.getCycleCost() >= constants.getCycle()){
+		//using getMemoryResponseCycleCosts as at this point only job on bus use memory
+		if(startCycle + constants.getMemoryResponseCycleCost() >= constants.getCycle()){
 			//tell the cache that its job is done
 			(*caches.at(currentCache)).busJobDone();
 		}
@@ -47,7 +47,7 @@ void AtomicBusManager::tick(){
 	//so either not in use, or we just finished a job
 	//loop for all processors starting from next 
 	for(int i = currentCache + 1; (i % constants.getNumProcessors()) != currentCache; i++){
-		if((*caches.at(i)).hasBusRequest()){
+		if(((caches.at(i%(constants.getNumProcessors()))) != NULL) && (*caches.at(i%(constants.getNumProcessors()))).hasBusRequest()){
 			//so we will now service this cache
 			currentRequest = (*caches.at(i)).getBusRequest();
 			tempNextCache = i;

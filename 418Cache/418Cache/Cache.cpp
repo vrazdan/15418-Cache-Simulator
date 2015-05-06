@@ -75,6 +75,24 @@ Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*> jobQueue)
 
 }
 
+/*
+Given an address, and two int*, set the pointer values to the set number and 
+the tag for the address
+*/
+void decode_address(unsigned long long address, int* whichSet, int* tag)
+{
+
+	int numSetBits = cacheConstants.getNumSetBits();
+	int numBytesBits = cacheConstants.getNumBytesBits();
+	int numTagBits = cacheConstants.getNumAddressBits() - (numSetBits + numBytesBits);
+
+	int currSet = (address >> numBytesBits) & ((1 << numSetBits)-1);
+	int currTag = (address >> (numSetBits + numBytesBits)) & ((1 << numTagBits)-1);
+
+	*whichSet = currSet;
+	*tag = currTag;
+
+}
 
 /*
 For the currentJob that we have, see if the line needed for it
@@ -94,7 +112,7 @@ bool inModifiedState(){
 	for(int i = 0; i < localCache.size(); i++){
 		if((localCache[i] != NULL) && (*localCache[i]).hasLine(*tag)){
 			CacheLine* theLine = (*localCache[i]).getLine(*tag);
-			if((*theLine).getState == CacheLine::modified){
+			if((*theLine).getState() == CacheLine::modified){
 				return true;
 			}
 		}
@@ -103,24 +121,7 @@ bool inModifiedState(){
 	return false;
 }
 
-/*
-Given an address, and two int*, set the pointer values to the set number and 
-the tag for the address
-*/
-void decode_address(unsigned long long address, int* whichSet, int* tag)
-{
 
-	int numSetBits = cacheConstants.getNumSetBits();
-	int numBytesBits = cacheConstants.getNumBytesBits();
-	int numTagBits = cacheConstants.getNumAddressBits() - (numSetBits + numBytesBits);
-
-	int currSet = (address >> numBytesBits) & ((1 << numSetBits)-1);
-	int currTag = (address >> (numSetBits + numBytesBits)) & ((1 << numTagBits)-1);
-
-	*whichSet = currSet;
-	*tag = currTag;
-
-}
 
 /*
 every tick
@@ -158,7 +159,7 @@ void Cache::handleRequest(){
 						*/
 						haveBusRequest = true;
 						busy = true; //aren't i almost always busy, unless no req?
-						busRequest = new BusRequest();
+						//busRequest = new BusRequest();
 
 						/*
 						busRequest = NULL;
@@ -202,15 +203,15 @@ bool Cache::hasBusRequest(){
 //from parsing the current memory job, 
 //if it needs to get access to the bus, make the obj and return it here
 //when the bus calls on us
-BusRequest Cache::getBusRequest(){
-
+BusRequest* Cache::getBusRequest(){
+	return NULL;
 }
 
 /*
 Read the current BusRequest that another cache issued to the bus
 and parse it to see if you need to update our own local cache
 */
-void Cache::snoopBusRequest(BusRequest request){
+void Cache::snoopBusRequest(BusRequest* request){
 
 }
 

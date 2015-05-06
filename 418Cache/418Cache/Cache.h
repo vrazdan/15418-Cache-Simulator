@@ -13,8 +13,8 @@ public:
 	void tick();
 	void busJobDone();
 	bool hasBusRequest();
-	BusRequest getBusRequest();
-	void snoopBusRequest(BusRequest);
+	BusRequest* getBusRequest();
+	void snoopBusRequest(BusRequest*);
 
 	 
 
