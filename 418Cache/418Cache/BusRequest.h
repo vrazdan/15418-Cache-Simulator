@@ -2,7 +2,8 @@
 class BusRequest
 {
 public:
-	BusRequest(void);
+	typedef enum {BusRd, BusRdX} BusMessage; 
+	BusRequest(BusMessage);
 	~BusRequest(void);
 };
 

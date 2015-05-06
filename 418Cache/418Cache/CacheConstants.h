@@ -16,6 +16,7 @@ public:
 	std::string getProtocol();
 	int getNumBytesBits();
 	int getNumSetBits();
+	int getNumAddressBits();
 
 
 	~CacheConstants(void);

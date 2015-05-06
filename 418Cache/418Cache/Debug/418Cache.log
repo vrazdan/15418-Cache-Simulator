@@ -1,21 +1,10 @@
-﻿Build started 5/5/2015 3:22:18 PM.
-     1>Project "C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\418Cache\418Cache.vcxproj" on node 2 (Build target(s)).
+﻿Build started 5/5/2015 11:35:00 PM.
+     1>Project "C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\418Cache\418Cache.vcxproj" on node 2 (ClCompile target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt AtomicBusManager.cpp Cache.cpp CacheConstants.cpp CacheController.cpp CacheSet.cpp
-         CacheConstants.cpp
-         Cache.cpp
-         AtomicBusManager.cpp
-         Generating Code...
-     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(77): error C4716: 'inModifiedState' : must return a value
-     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(133): error C4716: 'Cache::getBusRequest' : must return a value
-         Compiling...
-         CacheSet.cpp
-         CacheController.cpp
-     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cachecontroller.cpp(71): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\stdio.h(311) : see declaration of 'sscanf'
-         Generating Code...
-     1>Done Building Project "C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\418Cache\418Cache.vcxproj" (Build target(s)) -- FAILED.
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt CacheLine.cpp
+         CacheLine.cpp
+     1>Done Building Project "C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\418Cache\418Cache.vcxproj" (ClCompile target(s)).
 
-Build FAILED.
+Build succeeded.
 
-Time Elapsed 00:00:02.83
+Time Elapsed 00:00:00.73

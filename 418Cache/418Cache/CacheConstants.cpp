@@ -10,6 +10,7 @@ int numSetBits;
 int numLinesInSet;
 int numBytesInLine;
 int numBytesBits;
+int numAddressBits; //how many bits are the addresses
 
 int numCacheSize; //= 2^sets * 2^lines * bytesPerLine
 
@@ -39,9 +40,15 @@ CacheConstants::CacheConstants(void)
 	numBytesInLine = 64; //64 bytes per line
 	numBytesBits = 6; // 2^6 == 64
 	numCacheSize = (numSets * numLinesInSet * numBytesInLine); //~32k
+	numAddressBits = 48;
 	cycles = 0;
 	protocol = "MSI";
 }
+
+int CacheConstants::getNumAddressBits(){
+	return numAddressBits;
+}
+
 
 std::string CacheConstants::getProtocol(){
 	return protocol;

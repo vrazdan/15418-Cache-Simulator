@@ -6,7 +6,7 @@
 #include "CacheJob.h"
 #include "queue"
 #include "BusRequest.h"
-#include <math.h> 
+#include "CacheLine.h"
 
 /*
 So this is the main class for handling a processors cache.
@@ -27,6 +27,12 @@ CacheJob* currentJob;
 BusRequest* busRequest;
 int processorId;
 bool haveBusRequest;
+bool busy;
+unsigned long long startServiceCycle;
+unsigned long long jobCycleCost;
+
+
+
 
 /*
 so every tick call,
@@ -50,8 +56,6 @@ try to get access
 */
 
 
-
-
 Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*> jobQueue)
 {
 	cacheConstants = consts;
@@ -65,36 +69,66 @@ Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*> jobQueue)
 	currentJob = NULL;
 	busRequest = NULL;
 	haveBusRequest = false;
+	busy = false;
+	startServiceCycle = 0;
+	jobCycleCost = 0;
+
 }
 
-int Cache::getProcessorId(){
-	return processorId;
-}
 
+/*
+For the currentJob that we have, see if the line needed for it
+is in the modified state or not
+*/
 bool inModifiedState(){
-	unsigned long long addr = (*currentJob).getAddress();
-	unsigned long long setMask = (1<< (cacheConstants.getNumSetBits() +
-									cacheConstants.getNumBytesBits())) - 1;
-	setMask = setMask & (-1 << (cacheConstants.getNumBytesBits()));
-	//so now we have the bitmask for 1's in the bits for the set bits
+	int* set;
+	int* tag;
+	decode_address((*currentJob).getAddress(), set, tag);
+	/*
+	random thought-
+	we can tell if it's false sharing or not if the block offset isn't the same
+	as like what someone else has used
+	or something like that
+	*/
+	
+	for(int i = 0; i < localCache.size(); i++){
+		if((localCache[i] != NULL) && (*localCache[i]).hasLine(*tag)){
+			CacheLine* theLine = (*localCache[i]).getLine(*tag);
+			if((*theLine).getState == CacheLine::modified){
+				return true;
+			}
+		}
+	}
 
-
+	return false;
 }
 
-void decode_address(unsigned long long address, int* whichSet, int* whichLine)
+/*
+Given an address, and two int*, set the pointer values to the set number and 
+the tag for the address
+*/
+void decode_address(unsigned long long address, int* whichSet, int* tag)
 {
 
 	int numSetBits = cacheConstants.getNumSetBits();
 	int numBytesBits = cacheConstants.getNumBytesBits();
+	int numTagBits = cacheConstants.getNumAddressBits() - (numSetBits + numBytesBits);
 
-	unsigned long long currSet = (address >> numBytesBits) & ((1 << numSetBits)-1);
-	unsigned long long currLine = (address >> numBytesBits;
+	int currSet = (address >> numBytesBits) & ((1 << numSetBits)-1);
+	int currTag = (address >> (numSetBits + numBytesBits)) & ((1 << numTagBits)-1);
 
 	*whichSet = currSet;
-	*whichLine = currline;
+	*tag = currTag;
 
 }
 
+/*
+every tick
+if we don't currently doing shit
+then call handleRequest
+
+else, jack off
+*/
 void Cache::handleRequest(){
 	if (currentJob == NULL){
 		//so there are still jobs and we're not doing one right now
@@ -107,20 +141,41 @@ void Cache::handleRequest(){
 				//so if in the MSI protocol
 				if(cacheConstants.getProtocol().c_str() == "MSI"){
 					if(inModifiedState()){
+						//so we can service this request ez
+						startServiceCycle = cacheConstants.getCycle();
+						jobCycleCost = cacheConstants.getCacheHitCycleCost();
+						busy = true;
+						haveBusRequest = false;
+					}
+					else{
+						/*
+						so here we have to make a BusRequest
+						for whatever state transition we need for this job
+							for MSI protocol
+						set needbus to true
+						(in busrequest service fxn, we then set the start cycle time
+						and all the job cost time)
+						*/
+						haveBusRequest = true;
+						busy = true; //aren't i almost always busy, unless no req?
+						busRequest = new BusRequest();
+
+						/*
+						busRequest = NULL;
+						haveBusRequest = false;
+						busy = false;
+						startServiceCycle = 0;
+						jobCycleCost = 0;
+						*/
+
+
+
+
+
 
 					}
-
 				}
-
-
 			}
-
-
-
-
-				//pId, bus command (BusRdX, BusRd), line
-
-
 
 			/*
 			1) see if it's a write job
@@ -170,6 +225,13 @@ otherwise, maybe have a function to notify the CacheController that we're done?
 void Cache::busJobDone(){
 
 }
+
+
+
+int Cache::getProcessorId(){
+	return processorId;
+}
+
 
 void Cache::tick(){
 }
