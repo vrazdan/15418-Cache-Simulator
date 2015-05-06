@@ -140,6 +140,7 @@ void Cache::handleRequest(){
 					else{
 						/*
 						Need to do a bus request since we don't have the line in modified
+						either in shared or invalid or just not have it
 						*/
 						haveBusRequest = true;
 						busy = true; //aren't i almost always busy, unless no req?
@@ -155,32 +156,36 @@ void Cache::handleRequest(){
 			}
 			if((*currentJob).isRead()){
 				if(cacheConstants.getProtocol() == CacheConstants::MSI){
-					if(lineInState(CacheLine::invalid)){
-
-
+					if(lineInState(CacheLine::modified) || lineInState(CacheLine::shared)){
+						//so we have the line at least
+						//so we can read fine
+						haveBusRequest = false;
+						busy = true;
+						startServiceCycle = cacheConstants.getCycle();
+						jobCycleCost = cacheConstants.getCacheHitCycleCost();
 					}
-					/*
-					just need to see if we have the line, and it's not invalid
-					if it's invalid, we need to make a busrd req
-					*/
+					else{
+						//regardless of if it's in invalid state
+						//or we just don't ahve it
+						//we're gonna have to read it from somewhere
 
-
+						/*
+						BELOW CAN BE MADE INTO A SEPARATE FXN
+						THAT JUST TAKES IN THE BUSREQUEST TYPE AND SETS THE BUSREQUEST PROPERLY
+						CODE REUSEEEEEE
+						*/
+						//so we need to issue a request for the line
+						haveBusRequest = true;
+						busy = true;
+						int* set;
+						int* tag;
+						decode_address((*currentJob).getAddress(), set, tag);
+						//the cycle cost can be changed for different protocols and such
+						busRequest = new BusRequest(BusRequest::BusRd, *set, *tag, cacheConstants.getMemoryResponseCycleCost());
+						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
+					}
 				}
 			}
-
-			/*
-			1) see if it's a write job
-				if so,see if we need access
-					if we need access make a busrequest obj and set busreqneeded to true
-			2) if it's a read
-				check to see if we have it already in the local cache
-				in a modified / shared state
-				if so, we good
-			3) if invalid
-				make a busrequest obj so that we can get the data
-				set busreqneed to true
-				*/
-
 		}
 	}
 }
