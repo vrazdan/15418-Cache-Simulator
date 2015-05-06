@@ -149,7 +149,8 @@ void Cache::handleRequest(){
 						int* tag;
 						decode_address((*currentJob).getAddress(), set, tag);
 						//the cycle cost can be changed for different protocols and such
-						busRequest = new BusRequest(BusRequest::BusRdX, *set, *tag, cacheConstants.getMemoryResponseCycleCost());
+						busRequest = new BusRequest(BusRequest::BusRdX, *set, *tag,
+							cacheConstants.getMemoryResponseCycleCost());
 						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
 					}
 				}
@@ -181,7 +182,8 @@ void Cache::handleRequest(){
 						int* tag;
 						decode_address((*currentJob).getAddress(), set, tag);
 						//the cycle cost can be changed for different protocols and such
-						busRequest = new BusRequest(BusRequest::BusRd, *set, *tag, cacheConstants.getMemoryResponseCycleCost());
+						busRequest = new BusRequest(BusRequest::BusRd, *set, *tag,
+							cacheConstants.getMemoryResponseCycleCost());
 						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
 					}
 				}
