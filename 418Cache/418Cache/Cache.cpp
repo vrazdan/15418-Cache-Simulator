@@ -221,10 +221,40 @@ void Cache::snoopBusRequest(BusRequest* request){
 		5) if readx and w're in modified
 			set out to invalid
 			flush our data out to the bus so it can update memory and such
-
-
 	we can end up having variable length bus job accesses on how hard we try
 	*/
+	CacheSet* tempSet = localCache[(*request).getSet()];
+	for(int i = 0; i < cacheConstants.getNumLinesInSet(); i++){
+		if((*tempSet).hasLine((*request).getTag())){
+			//so we do have this line
+			CacheLine* tempLine = (*tempSet).getLine((*request).getTag());
+			if(cacheConstants.getProtocol() == CacheConstants::MSI){
+				//so in the MSI protocol
+				if((*request).getCommand() == BusRequest::BusRd){
+					//so a bus read
+					if((*tempLine).getState() == CacheLine::shared){
+						//we share the line
+						//so notify the busmanager we have the line
+						//and the busmanager will select one cache to give the data
+						//and will provide that to the requesting cache
+						//and technically we don't have to wait since no memory involved
+						break;
+					}//shared
+					if((*tempLine).getState() == CacheLine::modified){
+
+
+
+					}//modified
+
+
+
+
+
+				
+				}//busrd
+			}//msi protocol
+		}//we have the line
+	}//for all our sets
 
 }
 
