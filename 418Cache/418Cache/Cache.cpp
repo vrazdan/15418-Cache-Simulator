@@ -206,6 +206,25 @@ Read the current BusRequest that another cache issued to the bus
 and parse it to see if you need to update our own local cache
 */
 void Cache::snoopBusRequest(BusRequest* request){
+	/*
+	For write back snooping, we will have it so that 
+		1) if it's a read and we share the line, then busmanager picks the highest 
+				# cache to service it and we can somehow end the job early
+		2) if its a read and we have in modified
+				we flush to the bus and memory, so that the person who is listening 
+				gets the data, but still ahve to wait the full time for memory to get it
+				and make our version shared
+		3) if its a read and we dont have it
+				do nothing
+		4) if it's a readx and we're in shared
+			just set our line to invalid
+		5) if readx and w're in modified
+			set out to invalid
+			flush our data out to the bus so it can update memory and such
+
+
+	we can end up having variable length bus job accesses on how hard we try
+	*/
 
 }
 
