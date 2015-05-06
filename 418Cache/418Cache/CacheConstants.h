@@ -4,6 +4,7 @@ class CacheConstants
 {
 public:
 	CacheConstants(void);
+	typedef enum {MSI, MESI, MOESI} Protocol;
 	int getCacheHitCycleCost();
 	int getMemoryResponseCycleCost();
 	int getNumProcessors();
@@ -13,7 +14,7 @@ public:
 	int getNumCacheSize();
 	unsigned long long getCycle();
 	void tick();
-	std::string getProtocol();
+	Protocol getProtocol();
 	int getNumBytesBits();
 	int getNumSetBits();
 	int getNumAddressBits();

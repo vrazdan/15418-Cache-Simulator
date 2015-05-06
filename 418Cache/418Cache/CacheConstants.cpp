@@ -16,7 +16,7 @@ int numCacheSize; //= 2^sets * 2^lines * bytesPerLine
 
 unsigned long long cycles; //total count of all cycles elapsed in simulation
 
-std::string protocol; //string representing what the protocol is 
+CacheConstants::Protocol protocol; //string representing what the protocol is 
 
 //i don't care what the blockoffset actually is, because i don't care what the data actually is
 
@@ -42,7 +42,7 @@ CacheConstants::CacheConstants(void)
 	numCacheSize = (numSets * numLinesInSet * numBytesInLine); //~32k
 	numAddressBits = 48;
 	cycles = 0;
-	protocol = "MSI";
+	protocol = CacheConstants::MSI;
 }
 
 int CacheConstants::getNumAddressBits(){
@@ -50,7 +50,7 @@ int CacheConstants::getNumAddressBits(){
 }
 
 
-std::string CacheConstants::getProtocol(){
+CacheConstants::Protocol CacheConstants::getProtocol(){
 	return protocol;
 }
 

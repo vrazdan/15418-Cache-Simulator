@@ -95,32 +95,22 @@ void decode_address(unsigned long long address, int* whichSet, int* tag)
 }
 
 /*
-For the currentJob that we have, see if the line needed for it
-is in the modified state or not
+For a given state, see if the line the current job we are working on is in that state
 */
-bool inModifiedState(){
+bool lineInState(CacheLine::State state){
 	int* set;
 	int* tag;
 	decode_address((*currentJob).getAddress(), set, tag);
-	/*
-	random thought-
-	we can tell if it's false sharing or not if the block offset isn't the same
-	as like what someone else has used
-	or something like that
-	*/
-	
 	for(int i = 0; i < localCache.size(); i++){
 		if((localCache[i] != NULL) && (*localCache[i]).hasLine(*tag)){
 			CacheLine* theLine = (*localCache[i]).getLine(*tag);
-			if((*theLine).getState() == CacheLine::modified){
+			if((*theLine).getState() == state){
 				return true;
 			}
 		}
 	}
-
 	return false;
 }
-
 
 
 /*
@@ -139,8 +129,8 @@ void Cache::handleRequest(){
 
 			if((*currentJob).isWrite()){
 				//so if in the MSI protocol
-				if(cacheConstants.getProtocol().c_str() == "MSI"){
-					if(inModifiedState()){
+				if(cacheConstants.getProtocol() == CacheConstants::MSI){
+					if(lineInState(CacheLine::modified)){
 						//so we can service this request ez
 						startServiceCycle = cacheConstants.getCycle();
 						jobCycleCost = cacheConstants.getCacheHitCycleCost();
@@ -149,15 +139,11 @@ void Cache::handleRequest(){
 					}
 					else{
 						/*
-						so here we have to make a BusRequest
-						for whatever state transition we need for this job
-							for MSI protocol
-						set needbus to true
-						(in busrequest service fxn, we then set the start cycle time
-						and all the job cost time)
+						Need to do a bus request since we don't have the line in modified
 						*/
 						haveBusRequest = true;
 						busy = true; //aren't i almost always busy, unless no req?
+						//^ i guess busy depends on if i'm properly timing my stalls or not
 						int* set;
 						int* tag;
 						decode_address((*currentJob).getAddress(), set, tag);
@@ -165,6 +151,20 @@ void Cache::handleRequest(){
 						busRequest = new BusRequest(BusRequest::BusRdX, *set, *tag, cacheConstants.getMemoryResponseCycleCost());
 						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
 					}
+				}
+			}
+			if((*currentJob).isRead()){
+				if(cacheConstants.getProtocol() == CacheConstants::MSI){
+					if(lineInState(CacheLine::invalid)){
+
+
+					}
+					/*
+					just need to see if we have the line, and it's not invalid
+					if it's invalid, we need to make a busrd req
+					*/
+
+
 				}
 			}
 
@@ -192,6 +192,7 @@ bool Cache::hasBusRequest(){
 
 //return the current busRequest / one that is needed
 BusRequest* Cache::getBusRequest(){
+	startServiceCycle = cacheConstants.getCycle();
 	return busRequest;
 }
 
