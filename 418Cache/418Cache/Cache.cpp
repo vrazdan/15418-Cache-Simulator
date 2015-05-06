@@ -242,7 +242,7 @@ void Cache::snoopBusRequest(BusRequest* request){
 					}//shared
 					if((*tempLine).getState() == CacheLine::modified){
 
-
+						 
 
 					}//modified
 
