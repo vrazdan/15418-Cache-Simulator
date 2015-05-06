@@ -72,7 +72,11 @@ int Cache::getProcessorId(){
 
 bool inModifiedState(){
 	unsigned long long addr = (*currentJob).getAddress();
-	unsigned long long setMask = (-1 << (cacheConstants.getNumSetBits() + cacheConstants.getNumBytesBits()));
+	unsigned long long setMask = (1<< (cacheConstants.getNumSetBits() +
+									cacheConstants.getNumBytesBits())) - 1;
+	setMask = setMask & (-1 << (cacheConstants.getNumBytesBits()));
+	//so now we have the bitmask for 1's in the bits for the set bits
+
 
 }
 
