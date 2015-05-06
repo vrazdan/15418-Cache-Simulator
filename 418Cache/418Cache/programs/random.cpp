@@ -14,13 +14,10 @@ int test_array[NUM_ELEMENTS];
 
 void *access_array(void* test_array_in)
 {
-   	int a = test_array[1];
    	for (int i = 0; i < 5*NUM_ELEMENTS; ++i)
-   	{
-   		srand (time(NULL));
+    {
     	int num = rand() % NUM_ELEMENTS;
       	int value = test_array[num];
-      	srand (time(NULL));
       	int othernum = rand() % NUM_ELEMENTS;
       	test_array[othernum] = i + value;
    	}
@@ -30,9 +27,9 @@ void *access_array(void* test_array_in)
 int main ()
 {
    	pthread_t threads[NUM_THREADS];
-   	//test_array = (int*)malloc(sizeof(int)*NUM_ELEMENTS);
    	int rc;
    	int i;
+    srand (time(0));
    	for( i=0; i < NUM_THREADS; i++ ){
       	cout << "main() : creating thread, " << i << endl;
       	rc = pthread_create(&threads[i], NULL, 
