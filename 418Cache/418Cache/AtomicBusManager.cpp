@@ -34,7 +34,7 @@ void AtomicBusManager::tick(){
 	if(inUse){
 		//so the current job being executed is completed this cycle 
 		//using getMemoryResponseCycleCosts as at this point only job on bus use memory
-		if(startCycle + constants.getMemoryResponseCycleCost() >= constants.getCycle()){
+		if(startCycle + (*currentRequest).getCycleCost() >= constants.getCycle()){
 			//tell the cache that its job is done
 			(*caches.at(currentCache)).busJobDone();
 		}
@@ -79,6 +79,10 @@ void AtomicBusManager::tick(){
 	//so now we broadcast this currentRequest to all the caches other than the one who sent it
 	for(int i = 0; i < constants.getNumProcessors(); i++){
 		if(i != currentCache){
+			/*
+			TODO: we do not take into accout other caches saying if the line is dirty or shared or not
+			so like, if the memory has to respond or not? but i think that's just for MESI/moesi
+			*/
 			(*caches.at(i)).snoopBusRequest(currentRequest);
 		}
 	}

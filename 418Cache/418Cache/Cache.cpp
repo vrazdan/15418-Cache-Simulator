@@ -138,7 +138,6 @@ void Cache::handleRequest(){
 			pendingJobs.pop();
 
 			if((*currentJob).isWrite()){
-
 				//so if in the MSI protocol
 				if(cacheConstants.getProtocol().c_str() == "MSI"){
 					if(inModifiedState()){
@@ -159,21 +158,12 @@ void Cache::handleRequest(){
 						*/
 						haveBusRequest = true;
 						busy = true; //aren't i almost always busy, unless no req?
-						//busRequest = new BusRequest();
-
-						/*
-						busRequest = NULL;
-						haveBusRequest = false;
-						busy = false;
-						startServiceCycle = 0;
-						jobCycleCost = 0;
-						*/
-
-
-
-
-
-
+						int* set;
+						int* tag;
+						decode_address((*currentJob).getAddress(), set, tag);
+						//the cycle cost can be changed for different protocols and such
+						busRequest = new BusRequest(BusRequest::BusRdX, *set, *tag, cacheConstants.getMemoryResponseCycleCost());
+						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
 					}
 				}
 			}
@@ -200,11 +190,9 @@ bool Cache::hasBusRequest(){
 	return haveBusRequest;
 }
 
-//from parsing the current memory job, 
-//if it needs to get access to the bus, make the obj and return it here
-//when the bus calls on us
+//return the current busRequest / one that is needed
 BusRequest* Cache::getBusRequest(){
-	return NULL;
+	return busRequest;
 }
 
 /*
