@@ -10,6 +10,7 @@ public:
 	int getTag();
 	int getSetIndex();
 	State getState();
+	void setState(State state);
 	~CacheLine(void);
 };
 

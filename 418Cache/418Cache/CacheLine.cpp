@@ -24,6 +24,11 @@ CacheLine::State CacheLine::getState(){
 	return myState;
 }
 
+void CacheLine::setState(State state)
+{
+	mystate = state;
+}
+
 unsigned long long CacheLine::getAddress(){
 	return rawAddress;
 }

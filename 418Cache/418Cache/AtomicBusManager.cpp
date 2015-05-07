@@ -13,6 +13,8 @@ BusRequest* currentRequest;
 bool inUse;
 //which cycle we started a job on
 unsigned long long startCycle; 
+//what cycle we will end a job on
+unsigned long long endCycle;
 CacheConstants constants;
 //current job being worked on that has the bus access
 CacheJob currentJob;
@@ -24,6 +26,8 @@ AtomicBusManager::AtomicBusManager(CacheConstants consts, std::vector<Cache*> al
 	constants = consts;
 	caches = allCaches;
 	currentCache = 0;
+	startCycle = 0;
+	endCycle = 0;
 	inUse = false;
 }
 
@@ -34,9 +38,10 @@ void AtomicBusManager::tick(){
 	if(inUse){
 		//so the current job being executed is completed this cycle 
 		//using getMemoryResponseCycleCosts as at this point only job on bus use memory
-		if(startCycle + (*currentRequest).getCycleCost() >= constants.getCycle()){
+		if(endCycle <= constants.getCycle()){
 			//tell the cache that its job is done
 			(*caches.at(currentCache)).busJobDone();
+			inUse = false;
 		}
 		else{
 			return;
@@ -72,7 +77,8 @@ void AtomicBusManager::tick(){
 	
 	//since only get here if we got a new job
 	//update the startCycle for when we just changed jobs
-	startCycle = constants.getCycle(); 
+	startCycle = constants.getCycle();
+	endCycle = startCycle + currentRequest.getCycleCost(); 
 	inUse = true;
 
 	//so now we have the new currentRequest and currentCache is the cache that asked for that request
@@ -83,7 +89,25 @@ void AtomicBusManager::tick(){
 			TODO: we do not take into accout other caches saying if the line is dirty or shared or not
 			so like, if the memory has to respond or not? but i think that's just for MESI/moesi
 			*/
-			(*caches.at(i)).snoopBusRequest(currentRequest);
+			Cache::SnoopResult result = (*caches.at(i)).snoopBusRequest(currentRequest);
+			if(cacheConstants.getProtocol() == CacheConstants::MSI){
+			{
+				if (result == Cache::FLUSH)
+				{
+					endCycle += constants.getMemoryResponseCycleCost();
+				}
+				if (result == Cache::SHARED)
+				{
+					//Do nothing
+					continue;
+				}
+				if (result == Cache::NONE)
+				{
+					//Do nothing
+					continue;
+				}
+			}
+
 		}
 	}
 

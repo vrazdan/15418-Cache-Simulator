@@ -117,7 +117,6 @@ bool lineInState(CacheLine::State state){
 every tick
 if we don't currently doing shit
 then call handleRequest
-
 else, jack off
 */
 void Cache::handleRequest(){
@@ -207,7 +206,9 @@ BusRequest* Cache::getBusRequest(){
 Read the current BusRequest that another cache issued to the bus
 and parse it to see if you need to update our own local cache
 */
-void Cache::snoopBusRequest(BusRequest* request){
+Cache::SnoopResult Cache::snoopBusRequest(BusRequest* request){
+
+	SnoopResult result = NONE;
 	/*
 	For write back snooping, we will have it so that 
 		1) if it's a read and we share the line, then busmanager picks the highest 
@@ -226,38 +227,64 @@ void Cache::snoopBusRequest(BusRequest* request){
 	we can end up having variable length bus job accesses on how hard we try
 	*/
 	CacheSet* tempSet = localCache[(*request).getSet()];
-	for(int i = 0; i < cacheConstants.getNumLinesInSet(); i++){
-		if((*tempSet).hasLine((*request).getTag())){
-			//so we do have this line
-			CacheLine* tempLine = (*tempSet).getLine((*request).getTag());
-			if(cacheConstants.getProtocol() == CacheConstants::MSI){
-				//so in the MSI protocol
-				if((*request).getCommand() == BusRequest::BusRd){
-					//so a bus read
-					if((*tempLine).getState() == CacheLine::shared){
-						//we share the line
-						//so notify the busmanager we have the line
-						//and the busmanager will select one cache to give the data
-						//and will provide that to the requesting cache
-						//and technically we don't have to wait since no memory involved
-						break;
-					}//shared
-					if((*tempLine).getState() == CacheLine::modified){
-
-						 
-
-					}//modified
-
-
-
-
-
-				
-				}//busrd
-			}//msi protocol
-		}//we have the line
-	}//for all our sets
-
+	if((*tempSet).hasLine((*request).getTag())){
+		//so we do have this line
+		CacheLine* tempLine = (*tempSet).getLine((*request).getTag());
+		if(cacheConstants.getProtocol() == CacheConstants::MSI){
+			//so in the MSI protocol
+			if((*request).getCommand() == BusRequest::BusRd){
+				//so a bus read
+				if((*tempLine).getState() == CacheLine::shared){
+					//we share the line
+					//so notify the busmanager we have the line
+					//and the busmanager will select one cache to give the data
+					//and will provide that to the requesting cache
+					//and technically we don't have to wait since no memory involved
+					//However, we are assuming that the bus controller will fetch
+					//the data from memory anyways
+					result = shared;
+					break;
+				}//shared
+				if((*tempLine).getState() == CacheLine::modified){
+					//FLUSH LINE TO MEMORY
+					//and set the state to Shared
+					result = FLUSH;
+					(*tempLine).setState(CacheLine::shared);
+					break;
+				}//modified
+				if((*tempLine).getState() == CacheLine::invalid){
+					//We shouldn't do anything here – the line isn't even in the cache
+					break;
+				}
+			}//busrd
+			if ((*request).getCommand() == BusRequest::BusRdX)
+			{
+				if((*tempLine).getState() == CacheLine::shared){
+					//we share the line
+					//so notify the busmanager we have the line
+					//and the busmanager will select one cache to give the data
+					//and will provide that to the requesting cache
+					//and technically we don't have to wait since no memory involved
+					//However, we are assuming that the bus controller will fetch
+					//the data from memory anyways
+					(*tempLine).setState(CacheLine::invalid);
+					break;
+				}//shared
+				if((*tempLine).getState() == CacheLine::modified){
+					//FLUSH LINE TO MEMORY
+					//and set the state to Shared
+					result = FLUSH;
+					(*tempLine).setState(CacheLine::invalid);
+					break;
+				}//modified
+				if((*tempLine).getState() == CacheLine::invalid){
+					//We shouldn't do anything here – the line isn't even in the cache
+					break;
+				}	
+			}
+		}//msi protocol
+	}//we have the line
+	return result;
 }
 
 
@@ -269,7 +296,13 @@ if there is-> handleRequest()
 otherwise, maybe have a function to notify the CacheController that we're done?
 */
 void Cache::busJobDone(){
-
+	unsigned long long jobAddr = currentJob.getAddress();
+	int currJobSet;
+	int currJobTag;
+	decode_address(jobAddr, currJobSet, currJobTag)
+	if((*currentJob).isWrite()){
+		
+	}
 }
 
 

@@ -14,9 +14,8 @@ public:
 	void busJobDone();
 	bool hasBusRequest();
 	BusRequest* getBusRequest();
-	void snoopBusRequest(BusRequest*);
-
-	 
+	Cache::SnoopResult snoopBusRequest(BusRequest*);
+	typedef enum {SHARED, FLUSH, NONE} SnoopResult;	 
 
 	~Cache(void);
 };
