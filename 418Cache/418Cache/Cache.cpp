@@ -94,6 +94,20 @@ void decode_address(unsigned long long address, int* whichSet, int* tag)
 
 }
 
+unsigned long long getTotalMemoryCost(int set, int tag)
+{
+	unsigned long long result = cacheConstants.getMemoryResponseCycleCost();
+	CacheSet* currSet = localCache[set]; 
+	if (!*currSet.hasLine(tag))
+	{
+		if (*currSet.isFull())
+		{
+			result = result*2;
+		}
+	}
+	return result;
+}
+
 /*
 For a given state, see if the line the current job we are working on is in that state
 */
@@ -148,8 +162,10 @@ void Cache::handleRequest(){
 						int* tag;
 						decode_address((*currentJob).getAddress(), set, tag);
 						//the cycle cost can be changed for different protocols and such
+						unsigned long long memoryCost = getTotalMemoryCost(*set, *tag);
+
 						busRequest = new BusRequest(BusRequest::BusRdX, *set, *tag,
-							cacheConstants.getMemoryResponseCycleCost());
+							memoryCost);
 						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
 					}
 				}
@@ -300,8 +316,32 @@ void Cache::busJobDone(){
 	int currJobSet;
 	int currJobTag;
 	decode_address(jobAddr, currJobSet, currJobTag)
+	//IS THIS THE RIGHT WAY TO ACCESS A SET?!??!
+	CacheSet* currSet = localCache[currJobSet];
+
+	//Need to tell if we need to evict a line from the set
+	bool needToEvict = *currSet.isFull() && *currSet.hasLine(currJobTag);
+	if (needToEvict)
+	{
+		//Evict the line
+		*currSet.evictLRULine();
+	}
+
+	if (!*currSet.hasLine(currJobTag))
+	{
+		CacheLine newLine = new CacheLine(jobAddr, currJobSet, currJobTag);
+		*currSet.allLines.push_back(newLine);	
+	}
+
+	CacheLine* currLine = *currSet.getLine(currJobTag); 
+	*currLine.lastUsedCycle = cacheConstants.getCycle();
 	if((*currentJob).isWrite()){
-		
+		//Set the line's state to Modified
+		*currLine.setState(CacheLine::modified);
+	}
+	if((*currJob).isRead()){
+		//Set the line's state to Shared
+		*currLine.setState(CacheLine::shared);
 	}
 }
 
@@ -313,6 +353,7 @@ int Cache::getProcessorId(){
 
 
 void Cache::tick(){
+	
 }
 
 Cache::~Cache(void){

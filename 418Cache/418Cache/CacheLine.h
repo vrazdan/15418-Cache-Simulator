@@ -4,7 +4,7 @@ class CacheLine
 {
 public:
 	typedef enum {invalid, shared, modified, exclusive, open} State;
-
+	unsigned long long lastUsedCycle;
 	CacheLine(unsigned long long, int, int);
 	unsigned long long getAddress();
 	int getTag();

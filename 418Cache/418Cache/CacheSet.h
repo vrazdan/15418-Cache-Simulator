@@ -8,5 +8,7 @@ public:
 	bool hasLine(int);
 	CacheLine* getLine(int);
 	~CacheSet(void);
+	bool isFull();
+	void evictLRULine();
 };
 

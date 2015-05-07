@@ -18,6 +18,7 @@ CacheLine::CacheLine(unsigned long long address, int set, int tag)
 	setIndex = set;
 	myTag = tag;
 	myState = invalid;
+	lastUsedCycle = 0;
 }
 
 CacheLine::State CacheLine::getState(){
