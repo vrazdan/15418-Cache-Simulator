@@ -7,6 +7,7 @@
 class Cache
 {
 public:
+	typedef enum {SHARED, FLUSH, NONE} SnoopResult;	 
 	Cache(int, CacheConstants,std::queue<CacheJob*> );
 	int getProcessorId();
 	void handleRequest();
@@ -15,7 +16,7 @@ public:
 	bool hasBusRequest();
 	BusRequest* getBusRequest();
 	Cache::SnoopResult snoopBusRequest(BusRequest*);
-	typedef enum {SHARED, FLUSH, NONE} SnoopResult;	 
+	
 
 	~Cache(void);
 };

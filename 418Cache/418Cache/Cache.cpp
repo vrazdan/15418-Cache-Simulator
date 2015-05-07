@@ -34,28 +34,6 @@ unsigned long long jobCycleCost;
 
 
 
-/*
-so every tick call,
-if not currently executing a job
-see if there are job son the queue
-if so, take a job off the queue
-see if we can service the job without having to do a bus access
-	taking into account what the current job on the bus is
-if so, "service" the job
-
-if we can't service w/o bus access
-try to get access
-	if we can't get access, then stall 
-		(we do not support instruction reordering)
-	if we can get access
-		get access
-		issue our command on the bus 
-			will have to implement a bus command
-		TODO: from here, actually talk about how to deal with timing and shit
-
-*/
-
-
 Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*> jobQueue)
 {
 	cacheConstants = consts;
@@ -98,9 +76,9 @@ unsigned long long getTotalMemoryCost(int set, int tag)
 {
 	unsigned long long result = cacheConstants.getMemoryResponseCycleCost();
 	CacheSet* currSet = localCache[set]; 
-	if (!*currSet.hasLine(tag))
+	if (!(*currSet).hasLine(tag))
 	{
-		if (*currSet.isFull())
+		if ((*currSet).isFull())
 		{
 			result = result*2;
 		}
@@ -185,11 +163,6 @@ void Cache::handleRequest(){
 						//or we just don't ahve it
 						//we're gonna have to read it from somewhere
 
-						/*
-						BELOW CAN BE MADE INTO A SEPARATE FXN
-						THAT JUST TAKES IN THE BUSREQUEST TYPE AND SETS THE BUSREQUEST PROPERLY
-						CODE REUSEEEEEE
-						*/
 						//so we need to issue a request for the line
 						haveBusRequest = true;
 						busy = true;
@@ -258,19 +231,19 @@ Cache::SnoopResult Cache::snoopBusRequest(BusRequest* request){
 					//and technically we don't have to wait since no memory involved
 					//However, we are assuming that the bus controller will fetch
 					//the data from memory anyways
-					result = shared;
-					break;
+					result = Cache::SHARED;
+					return result;
 				}//shared
 				if((*tempLine).getState() == CacheLine::modified){
 					//FLUSH LINE TO MEMORY
 					//and set the state to Shared
 					result = FLUSH;
 					(*tempLine).setState(CacheLine::shared);
-					break;
+					return result;
 				}//modified
 				if((*tempLine).getState() == CacheLine::invalid){
 					//We shouldn't do anything here – the line isn't even in the cache
-					break;
+					return result;
 				}
 			}//busrd
 			if ((*request).getCommand() == BusRequest::BusRdX)
@@ -284,18 +257,18 @@ Cache::SnoopResult Cache::snoopBusRequest(BusRequest* request){
 					//However, we are assuming that the bus controller will fetch
 					//the data from memory anyways
 					(*tempLine).setState(CacheLine::invalid);
-					break;
+					return result;
 				}//shared
 				if((*tempLine).getState() == CacheLine::modified){
 					//FLUSH LINE TO MEMORY
 					//and set the state to Shared
 					result = FLUSH;
 					(*tempLine).setState(CacheLine::invalid);
-					break;
+					return result;
 				}//modified
 				if((*tempLine).getState() == CacheLine::invalid){
 					//We shouldn't do anything here – the line isn't even in the cache
-					break;
+					return result;
 				}	
 			}
 		}//msi protocol
@@ -312,36 +285,37 @@ if there is-> handleRequest()
 otherwise, maybe have a function to notify the CacheController that we're done?
 */
 void Cache::busJobDone(){
-	unsigned long long jobAddr = currentJob.getAddress();
-	int currJobSet;
-	int currJobTag;
-	decode_address(jobAddr, currJobSet, currJobTag)
+	unsigned long long jobAddr = (*currentJob).getAddress();
+	int* currJobSet;
+	int* currJobTag;
+	decode_address(jobAddr, currJobSet, currJobTag);
 	//IS THIS THE RIGHT WAY TO ACCESS A SET?!??!
-	CacheSet* currSet = localCache[currJobSet];
+	CacheSet* currSet = localCache[*currJobSet];
 
 	//Need to tell if we need to evict a line from the set
-	bool needToEvict = *currSet.isFull() && *currSet.hasLine(currJobTag);
+	bool needToEvict = (*currSet).isFull() && (*currSet).hasLine(*currJobTag);
 	if (needToEvict)
 	{
 		//Evict the line
-		*currSet.evictLRULine();
+		(*currSet).evictLRULine();
 	}
 
-	if (!*currSet.hasLine(currJobTag))
+	if (!(*currSet).hasLine(*currJobTag))
 	{
-		CacheLine newLine = new CacheLine(jobAddr, currJobSet, currJobTag);
-		*currSet.allLines.push_back(newLine);	
+		CacheLine* newLine = new CacheLine(jobAddr, *currJobSet, *currJobTag);
+		//(*currSet).allLines().push_back(newLine);	
+		(*currSet).addLine(newLine);
 	}
 
-	CacheLine* currLine = *currSet.getLine(currJobTag); 
-	*currLine.lastUsedCycle = cacheConstants.getCycle();
+	CacheLine* currLine = (*currSet).getLine(*currJobTag); 
+	(*currLine).lastUsedCycle = cacheConstants.getCycle();
 	if((*currentJob).isWrite()){
 		//Set the line's state to Modified
-		*currLine.setState(CacheLine::modified);
+		(*currLine).setState(CacheLine::modified);
 	}
-	if((*currJob).isRead()){
+	if((*currentJob).isRead()){
 		//Set the line's state to Shared
-		*currLine.setState(CacheLine::shared);
+		(*currLine).setState(CacheLine::shared);
 	}
 }
 
@@ -353,6 +327,29 @@ int Cache::getProcessorId(){
 
 
 void Cache::tick(){
+	
+
+
+/*
+so every tick call,
+if not currently executing a job
+see if there are job son the queue
+if so, take a job off the queue
+see if we can service the job without having to do a bus access
+	taking into account what the current job on the bus is
+if so, "service" the job
+
+if we can't service w/o bus access
+try to get access
+	if we can't get access, then stall 
+		(we do not support instruction reordering)
+	if we can get access
+		get access
+		issue our command on the bus 
+			will have to implement a bus command
+		TODO: from here, actually talk about how to deal with timing and shit
+
+*/
 	
 }
 

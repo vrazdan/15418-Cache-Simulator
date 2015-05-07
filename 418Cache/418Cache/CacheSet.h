@@ -10,5 +10,6 @@ public:
 	~CacheSet(void);
 	bool isFull();
 	void evictLRULine();
+	void addLine(CacheLine*);
 };
 

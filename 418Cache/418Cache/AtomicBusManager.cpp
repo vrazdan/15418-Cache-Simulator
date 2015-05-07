@@ -78,7 +78,7 @@ void AtomicBusManager::tick(){
 	//since only get here if we got a new job
 	//update the startCycle for when we just changed jobs
 	startCycle = constants.getCycle();
-	endCycle = startCycle + currentRequest.getCycleCost(); 
+	endCycle = startCycle + (*currentRequest).getCycleCost(); 
 	inUse = true;
 
 	//so now we have the new currentRequest and currentCache is the cache that asked for that request
@@ -90,7 +90,7 @@ void AtomicBusManager::tick(){
 			so like, if the memory has to respond or not? but i think that's just for MESI/moesi
 			*/
 			Cache::SnoopResult result = (*caches.at(i)).snoopBusRequest(currentRequest);
-			if(cacheConstants.getProtocol() == CacheConstants::MSI){
+			if(constants.getProtocol() == CacheConstants::MSI){
 			{
 				if (result == Cache::FLUSH)
 				{
@@ -113,6 +113,7 @@ void AtomicBusManager::tick(){
 
 	//so now all caches have acknowledged the new BusRequest that was issued
 	//so we're done
+	}
 }
 
 

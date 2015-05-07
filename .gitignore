@@ -41,3 +41,13 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.opensdf
+418Cache/418Cache.sdf
+*.obj
+*.log
+*.tlog
+418Cache/418Cache/Debug/CacheLine.obj
+*.log
+*.suo
+418Cache/418Cache.sdf
+*.obj

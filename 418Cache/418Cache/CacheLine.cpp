@@ -27,7 +27,7 @@ CacheLine::State CacheLine::getState(){
 
 void CacheLine::setState(State state)
 {
-	mystate = state;
+	myState = state;
 }
 
 unsigned long long CacheLine::getAddress(){

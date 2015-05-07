@@ -1,10 +1,47 @@
-﻿Build started 5/5/2015 11:35:00 PM.
-     1>Project "C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\418Cache\418Cache.vcxproj" on node 2 (ClCompile target(s)).
+﻿Build started 5/6/2015 11:26:52 PM.
+     1>Project "C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\418Cache\418Cache.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt CacheLine.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt AtomicBusManager.cpp BusRequest.cpp Cache.cpp CacheConstants.cpp CacheController.cpp CacheJob.cpp CacheLine.cpp CacheSet.cpp CacheStats.cpp
+         CacheStats.cpp
+         CacheSet.cpp
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cacheset.cpp(20): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cacheset.cpp(36): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cacheset.cpp(47): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cacheset.cpp(59): warning C4018: '<' : signed/unsigned mismatch
          CacheLine.cpp
-     1>Done Building Project "C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\418Cache\418Cache.vcxproj" (ClCompile target(s)).
+         CacheJob.cpp
+         CacheController.cpp
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cachecontroller.cpp(70): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\stdio.h(311) : see declaration of 'sscanf'
+         CacheConstants.cpp
+         Cache.cpp
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(96): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(146): warning C4244: 'argument' : conversion from 'unsigned __int64' to 'int', possible loss of data
+         BusRequest.cpp
+         AtomicBusManager.cpp
+         Generating Code...
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(95): warning C4700: uninitialized local variable 'tag' used
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(95): warning C4700: uninitialized local variable 'set' used
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(141): warning C4700: uninitialized local variable 'tag' used
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(141): warning C4700: uninitialized local variable 'set' used
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(171): warning C4700: uninitialized local variable 'tag' used
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(171): warning C4700: uninitialized local variable 'set' used
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(291): warning C4700: uninitialized local variable 'currJobTag' used
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(291): warning C4700: uninitialized local variable 'currJobSet' used
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\Debug\418Cache.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\Debug\418Cache.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\Debug\418Cache.lib" /MACHINE:X86 Debug\418Cache.res
+         Debug\AtomicBusManager.obj
+         Debug\BusRequest.obj
+         Debug\Cache.obj
+         Debug\CacheConstants.obj
+         Debug\CacheController.obj
+         Debug\CacheJob.obj
+         Debug\CacheLine.obj
+         Debug\CacheSet.obj
+         Debug\CacheStats.obj
+         418Cache.vcxproj -> C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\Debug\418Cache.exe
+     1>Done Building Project "C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\418Cache\418Cache.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:00.73
+Time Elapsed 00:00:06.02

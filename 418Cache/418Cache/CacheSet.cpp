@@ -19,12 +19,17 @@ bool CacheSet::isFull()
 {
 	for (int i = 0; i < allLines.size(); ++i)
 	{
-		if (allLines[i] == NULL || (*allLines[i].getState() == CacheLine::invalid))
+		if (allLines[i] == NULL || ((*allLines[i]).getState() == CacheLine::invalid))
 		{
 			return false;
 		}
 	}
 	return true;
+}
+
+void CacheSet::addLine(CacheLine* line){
+	allLines.push_back(line);
+
 }
 
 bool CacheSet::hasLine(int tag){
@@ -50,17 +55,16 @@ CacheLine* CacheSet::getLine(int tag){
 void CacheSet::evictLRULine()
 {
 	unsigned long long leastRecentCycle = ULLONG_MAX;
-	CacheLine* lineToEvict;
 	int lineToEvict;
 	for (int i = 0; i < allLines.size(); ++i)
 	{
-		if ((allLines[i] != NULL) && *allLines[i].lastUsedCycle < leastRecentCycle)
+		if ((allLines[i] != NULL) && (*allLines[i]).lastUsedCycle < leastRecentCycle)
 		{
-			leastRecentCycle = *allLines[i].lastUsedCycle;
+			leastRecentCycle = (*allLines[i]).lastUsedCycle;
 			lineToEvict = i;
 		}
 	}
-	allLines.erase(i);
+	allLines.erase(allLines.begin() + lineToEvict);
 }
 
 CacheSet::~CacheSet(void)
