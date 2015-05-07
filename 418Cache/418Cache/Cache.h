@@ -8,7 +8,7 @@ class Cache
 {
 public:
 	typedef enum {SHARED, FLUSH, NONE} SnoopResult;	 
-	Cache(int, CacheConstants,std::queue<CacheJob*> );
+	Cache(int, CacheConstants,std::queue<CacheJob*>* );
 	int getProcessorId();
 	void handleRequest();
 	void tick();

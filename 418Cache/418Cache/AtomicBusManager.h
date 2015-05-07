@@ -5,7 +5,7 @@
 class AtomicBusManager
 {
 public:
-	AtomicBusManager(CacheConstants, std::vector<Cache*> );
+	AtomicBusManager(CacheConstants, std::vector<Cache*>* );
 	void tick(void);
 	~AtomicBusManager(void);
 };

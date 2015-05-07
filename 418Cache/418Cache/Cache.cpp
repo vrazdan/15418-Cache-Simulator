@@ -34,7 +34,7 @@ unsigned long long jobCycleCost;
 
 
 
-Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*> jobQueue)
+Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*>* jobQueue)
 {
 	cacheConstants = consts;
 	//make a vector of the CacheSet 
@@ -43,7 +43,8 @@ Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*> jobQueue)
 		localCache[i] = new CacheSet(&consts);
 	}
 	processorId = pId;
-	pendingJobs = jobQueue;
+	pendingJobs = *jobQueue;
+	printf("number of pending jobs for cache %d is %d \n", processorId, pendingJobs.size());
 	currentJob = NULL;
 	busRequest = NULL;
 	haveBusRequest = false;
@@ -114,9 +115,11 @@ else, jack off
 void Cache::handleRequest(){
 	if (currentJob == NULL){
 		//so there are still jobs and we're not doing one right now
+		printf("inside handlerequest, the size of pending jobs is %d for cache %d \n", pendingJobs.size(), processorId);
 		if(!pendingJobs.empty()){
 			currentJob = pendingJobs.front();
 			pendingJobs.pop();
+			printf("lets make a job for cache %d \n", processorId);
 
 			if((*currentJob).isWrite()){
 				//so if in the MSI protocol
@@ -187,6 +190,7 @@ bool Cache::hasBusRequest(){
 
 //return the current busRequest / one that is needed
 BusRequest* Cache::getBusRequest(){
+	printf("cache %d got able to put out a bus request \n", processorId);
 	startServiceCycle = cacheConstants.getCycle();
 	return busRequest;
 }
@@ -330,6 +334,7 @@ int Cache::getProcessorId(){
 
 
 void Cache::tick(){
+	printf("cache %d is now in tick \n", processorId);
 	if(!busy){
 		//so we're free to do a new request
 		handleRequest();

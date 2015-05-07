@@ -21,10 +21,10 @@ CacheJob currentJob;
 //list of all the caches in the system
 std::vector<Cache*> caches;
 
-AtomicBusManager::AtomicBusManager(CacheConstants consts, std::vector<Cache*> allCaches)
+AtomicBusManager::AtomicBusManager(CacheConstants consts, std::vector<Cache*>* allCaches)
 {
 	constants = consts;
-	caches = allCaches;
+	caches = *allCaches;
 	currentCache = 0;
 	startCycle = 0;
 	endCycle = 0;
@@ -51,17 +51,21 @@ void AtomicBusManager::tick(){
 	int tempNextCache = -1;
 	//so either not in use, or we just finished a job
 	//loop for all processors starting from next 
+	printf("currentCache in atomicbusmanager is %d \n", currentCache);
 	for(int i = currentCache + 1; (i % constants.getNumProcessors()) != currentCache; i++){
 		if(((caches.at(i%(constants.getNumProcessors()))) != NULL) && (*caches.at(i%(constants.getNumProcessors()))).hasBusRequest()){
 			//so we will now service this cache
 			currentRequest = (*caches.at(i)).getBusRequest();
 			tempNextCache = i;
+			printf("found a cache to service, it's cache %d \n", tempNextCache);
 			break;
 		}
 	}
 	if(tempNextCache == -1){
 		//so we didn't find anyone else who had a request, so see if currentCache can
+		printf("didn't find anyone to service, checking current cache \n");
 		if((*caches.at(currentCache)).hasBusRequest()){
+			printf("current cache %d did have a request \n", currentCache);
 			currentRequest = (*caches.at(currentCache)).getBusRequest();
 			tempNextCache = currentCache;
 		}
@@ -70,10 +74,12 @@ void AtomicBusManager::tick(){
 	if(tempNextCache == -1){
 		//so there are no more pending requests in the system
 		//we're done
+		printf("no one to service, leaving \n");
 		inUse = false;
 		return;
 	}
 	currentCache = tempNextCache;
+	printf("current Cache now just got set to %d \n", currentCache);
 
 	//since only get here if we got a new job
 	//update the startCycle for when we just changed jobs

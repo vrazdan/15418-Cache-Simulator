@@ -73,20 +73,23 @@ int main(int argc, char* argv[]){
 		printf("rw:%c addr:%llX threadId:%d \n", readWrite, address, threadId);
 	}
 
-	for(int i = 0; i < (constants).getNumProcessors(); i++){
-		caches[i] = new Cache(i, constants, outstandingRequests.at(i));
+	for(int i = 0; i < constants.getNumProcessors(); i++){
+		printf("number of jobs cache %d SHOULD have is %d \n", i, outstandingRequests.at(i).size());
+		caches.push_back(new Cache(i, constants, &outstandingRequests.at(i)));
+		printf("caches[%d] pId is %d \n", i, (*caches[i]).getProcessorId());
 	}
 	
 	//so now all queues are full with the jobs they need to run
-	bus = new AtomicBusManager(constants, caches);
+	bus = new AtomicBusManager(constants, &caches);
 
 	while(!queuesEmpty(outstandingRequests, numProcessors)){
 	
 		//time must first increment for the constants
 		constants.tick();
 		//then call for all the caches
-		for(int i = 0; i < numProcessors; i++){
-			(*caches[i]).tick();
+		for(int j = 0; j < numProcessors; j++){
+			printf("trying to tick for cache %d, actually ticking cache %d \n", j, (*caches[j]).getProcessorId());
+			(*caches[j]).tick();
 		}
 		//then call the bus manager
 		(*bus).tick();
