@@ -44,7 +44,7 @@ Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*>* jobQueue)
 	}
 	processorId = pId;
 	pendingJobs = *jobQueue;
-	printf("number of pending jobs for cache %d is %d \n", processorId, pendingJobs.size());
+	printf("number of pending jobs for cache %d (or is it %d ??) is %d \n", processorId, pId, pendingJobs.size());
 	currentJob = NULL;
 	busRequest = NULL;
 	haveBusRequest = false;
@@ -53,6 +53,11 @@ Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*>* jobQueue)
 	jobCycleCost = 0;
 
 }
+
+void Cache::setPId(int pid){
+	processorId = pid;
+}
+
 
 /*
 Given an address, and two int*, set the pointer values to the set number and 
@@ -334,7 +339,7 @@ int Cache::getProcessorId(){
 
 
 void Cache::tick(){
-	printf("cache %d is now in tick \n", processorId);
+	printf("cache %d is now in tick and num jobs is %d \n", processorId, pendingJobs.size());
 	if(!busy){
 		//so we're free to do a new request
 		handleRequest();

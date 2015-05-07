@@ -39,7 +39,7 @@ int main(int argc, char* argv[]){
 	unsigned int threadId = 0;
 	std::string line;
 	AtomicBusManager* bus;
-	std::vector<Cache*> caches (numProcessors);
+	std::vector<Cache*> caches;
 
 	//keep track of all jobs that the processors have to do
 	std::vector<std::queue<CacheJob*>> outstandingRequests (numProcessors); 
@@ -75,9 +75,28 @@ int main(int argc, char* argv[]){
 
 	for(int i = 0; i < constants.getNumProcessors(); i++){
 		printf("number of jobs cache %d SHOULD have is %d \n", i, outstandingRequests.at(i).size());
-		caches.push_back(new Cache(i, constants, &outstandingRequests.at(i)));
-		printf("caches[%d] pId is %d \n", i, (*caches[i]).getProcessorId());
+		Cache* temp = new Cache(i, constants, &outstandingRequests.at(i));
+		printf("temp pid is %d \n", (*temp).getProcessorId());
+		std::vector<Cache*>::iterator itt = caches.end();
+		caches.insert(itt, temp);
+		//caches.push_back(temp);
+		//caches.push_back(new Cache(i, constants, &outstandingRequests.at(i)));
+		printf("caches[%d] pId is %d address is %x \n", i, (*caches[i]).getProcessorId(), temp);
+		for(int y = 0; y < i; y++){
+			printf("inside the for loop, up to this point cache %d pId is %d at addr %x \n", y, (*caches[y]).getProcessorId(), caches[y]);
+		}
 	}
+	printf("\n");
+	for(int i = 0; i < constants.getNumProcessors(); i++){
+		(*caches[i]).setPId(i);
+	}
+
+	(*caches[0]).setPId(0);
+
+	for(std::vector<Cache*>::iterator it = caches.begin(); it != caches.end(); ++it){
+		printf("%d \n",(*(*it)).getProcessorId());
+	}
+	printf("\n len vector is %d \n", caches.size());
 	
 	//so now all queues are full with the jobs they need to run
 	bus = new AtomicBusManager(constants, &caches);
@@ -88,8 +107,8 @@ int main(int argc, char* argv[]){
 		constants.tick();
 		//then call for all the caches
 		for(int j = 0; j < numProcessors; j++){
-			printf("trying to tick for cache %d, actually ticking cache %d \n", j, (*caches[j]).getProcessorId());
-			(*caches[j]).tick();
+			printf("trying to tick for cache %d, actually ticking cache %d \n", j, (*caches.at(j)).getProcessorId());
+			(*caches.at(j)).tick();
 		}
 		//then call the bus manager
 		(*bus).tick();

@@ -10,6 +10,7 @@ public:
 	typedef enum {SHARED, FLUSH, NONE} SnoopResult;	 
 	Cache(int, CacheConstants,std::queue<CacheJob*>* );
 	int getProcessorId();
+	void setPId(int);
 	void handleRequest();
 	void tick();
 	void busJobDone();
