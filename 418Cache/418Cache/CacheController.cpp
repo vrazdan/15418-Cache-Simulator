@@ -19,7 +19,7 @@ CacheController::~CacheController(void)
 }
 
 
-bool queuesEmpty(std::vector<std::queue<CacheJob*>> requests, int numProcessors){
+bool queuesEmpty(std::vector<std::queue<CacheJob*> > requests, int numProcessors){
 	bool allEmpty = true;
 	for(int i = 0; i < numProcessors; i++){
 		if(!requests[i].empty()){
@@ -42,7 +42,7 @@ int main(int argc, char* argv[]){
 	std::vector<Cache*> caches;
 
 	//keep track of all jobs that the processors have to do
-	std::vector<std::queue<CacheJob*>> outstandingRequests (numProcessors); 
+	std::vector<std::queue<CacheJob*> > outstandingRequests (numProcessors); 
 
 	//TODO: change this into accepting file names from a Traces/ folder in the same directory
 	/* right now assuming only argument passed in is the name of the trace 

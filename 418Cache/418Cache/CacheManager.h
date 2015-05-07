@@ -3,7 +3,7 @@
 class CacheManager
 {
 public:
-	CacheController(void);
-	~CacheController(void);
+	CacheManager(void);
+	~CacheManager(void);
 };
 
