@@ -90,12 +90,12 @@ unsigned long long getTotalMemoryCost(int set, int tag)
 For a given state, see if the line the current job we are working on is in that state
 */
 bool lineInState(CacheLine::State state){
-	int* set;
-	int* tag;
-	decode_address((*currentJob).getAddress(), set, tag);
+	int set = 0;
+	int tag = 0;
+	decode_address((*currentJob).getAddress(), &set, &tag);
 	for(int i = 0; i < localCache.size(); i++){
-		if((localCache[i] != NULL) && (*localCache[i]).hasLine(*tag)){
-			CacheLine* theLine = (*localCache[i]).getLine(*tag);
+		if((localCache[i] != NULL) && (*localCache[i]).hasLine(tag)){
+			CacheLine* theLine = (*localCache[i]).getLine(tag);
 			if((*theLine).getState() == state){
 				return true;
 			}
@@ -136,13 +136,13 @@ void Cache::handleRequest(){
 						haveBusRequest = true;
 						busy = true; //aren't i almost always busy, unless no req?
 						//^ i guess busy depends on if i'm properly timing my stalls or not
-						int* set;
-						int* tag;
-						decode_address((*currentJob).getAddress(), set, tag);
+						int set = 0;
+						int tag = 0;
+						decode_address((*currentJob).getAddress(), &set, &tag);
 						//the cycle cost can be changed for different protocols and such
-						unsigned long long memoryCost = getTotalMemoryCost(*set, *tag);
+						unsigned long long memoryCost = getTotalMemoryCost(set, tag);
 
-						busRequest = new BusRequest(BusRequest::BusRdX, *set, *tag,
+						busRequest = new BusRequest(BusRequest::BusRdX, set, tag,
 							memoryCost);
 						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
 					}
@@ -166,11 +166,11 @@ void Cache::handleRequest(){
 						//so we need to issue a request for the line
 						haveBusRequest = true;
 						busy = true;
-						int* set;
-						int* tag;
-						decode_address((*currentJob).getAddress(), set, tag);
+						int set = 0;
+						int tag = 0;
+						decode_address((*currentJob).getAddress(), &set, &tag);
 						//the cycle cost can be changed for different protocols and such
-						busRequest = new BusRequest(BusRequest::BusRd, *set, *tag,
+						busRequest = new BusRequest(BusRequest::BusRd, set, tag,
 							cacheConstants.getMemoryResponseCycleCost());
 						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
 					}
@@ -286,28 +286,31 @@ otherwise, maybe have a function to notify the CacheController that we're done?
 */
 void Cache::busJobDone(){
 	unsigned long long jobAddr = (*currentJob).getAddress();
-	int* currJobSet;
-	int* currJobTag;
-	decode_address(jobAddr, currJobSet, currJobTag);
+	int currJobSet = 0;
+	int currJobTag = 0;
+	decode_address(jobAddr, &currJobSet, &currJobTag);
+
+	haveBusRequest = false;
+	busy = false;
 	//IS THIS THE RIGHT WAY TO ACCESS A SET?!??!
-	CacheSet* currSet = localCache[*currJobSet];
+	CacheSet* currSet = localCache[currJobSet];
 
 	//Need to tell if we need to evict a line from the set
-	bool needToEvict = (*currSet).isFull() && (*currSet).hasLine(*currJobTag);
+	bool needToEvict = (*currSet).isFull() && (*currSet).hasLine(currJobTag);
 	if (needToEvict)
 	{
 		//Evict the line
 		(*currSet).evictLRULine();
 	}
 
-	if (!(*currSet).hasLine(*currJobTag))
+	if (!(*currSet).hasLine(currJobTag))
 	{
-		CacheLine* newLine = new CacheLine(jobAddr, *currJobSet, *currJobTag);
+		CacheLine* newLine = new CacheLine(jobAddr, currJobSet, currJobTag);
 		//(*currSet).allLines().push_back(newLine);	
 		(*currSet).addLine(newLine);
 	}
 
-	CacheLine* currLine = (*currSet).getLine(*currJobTag); 
+	CacheLine* currLine = (*currSet).getLine(currJobTag); 
 	(*currLine).lastUsedCycle = cacheConstants.getCycle();
 	if((*currentJob).isWrite()){
 		//Set the line's state to Modified
@@ -327,30 +330,10 @@ int Cache::getProcessorId(){
 
 
 void Cache::tick(){
-	
-
-
-/*
-so every tick call,
-if not currently executing a job
-see if there are job son the queue
-if so, take a job off the queue
-see if we can service the job without having to do a bus access
-	taking into account what the current job on the bus is
-if so, "service" the job
-
-if we can't service w/o bus access
-try to get access
-	if we can't get access, then stall 
-		(we do not support instruction reordering)
-	if we can get access
-		get access
-		issue our command on the bus 
-			will have to implement a bus command
-		TODO: from here, actually talk about how to deal with timing and shit
-
-*/
-	
+	if(!busy){
+		//so we're free to do a new request
+		handleRequest();
+	}
 }
 
 Cache::~Cache(void){

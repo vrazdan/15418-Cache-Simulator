@@ -66,7 +66,6 @@ void AtomicBusManager::tick(){
 			tempNextCache = currentCache;
 		}
 	}
-	currentCache = tempNextCache;
 	
 	if(tempNextCache == -1){
 		//so there are no more pending requests in the system
@@ -74,7 +73,8 @@ void AtomicBusManager::tick(){
 		inUse = false;
 		return;
 	}
-	
+	currentCache = tempNextCache;
+
 	//since only get here if we got a new job
 	//update the startCycle for when we just changed jobs
 	startCycle = constants.getCycle();

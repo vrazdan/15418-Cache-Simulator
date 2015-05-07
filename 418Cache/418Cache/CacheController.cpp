@@ -60,10 +60,7 @@ int main(int argc, char* argv[]){
 		exit(0);
 	}
 	
-	for(int i = 0; i < (constants).getNumProcessors(); i++){
-		caches[i] = new Cache(i, constants, outstandingRequests.at(i));
-	}
-	
+
 
 	while(getline(tracefile, line)){
 		//so while there are lines to read from the trace
@@ -75,6 +72,11 @@ int main(int argc, char* argv[]){
 		outstandingRequests.at(accessProcessorId).push(new CacheJob(readWrite, address, threadId));
 		printf("rw:%c addr:%llX threadId:%d \n", readWrite, address, threadId);
 	}
+
+	for(int i = 0; i < (constants).getNumProcessors(); i++){
+		caches[i] = new Cache(i, constants, outstandingRequests.at(i));
+	}
+	
 	//so now all queues are full with the jobs they need to run
 	bus = new AtomicBusManager(constants, caches);
 
