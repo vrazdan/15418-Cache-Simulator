@@ -4,6 +4,10 @@ class CacheLine
 {
 public:
 	typedef enum {invalid, shared, modified, exclusive, open} State;
+	unsigned long long rawAddress; //raw address that maps to me (ignoring block offset)
+	int setIndex; //what set i'm in
+	int myTag; //unique tag identifier
+	CacheLine::State myState;
 	unsigned long long lastUsedCycle;
 	CacheLine(unsigned long long, int, int);
 	unsigned long long getAddress();

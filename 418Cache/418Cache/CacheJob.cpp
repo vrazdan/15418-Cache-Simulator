@@ -1,10 +1,5 @@
 #include "CacheJob.h"
 
-
-char rW;
-unsigned long long address;
-int threadId;
-
 CacheJob::CacheJob(){
 }
 

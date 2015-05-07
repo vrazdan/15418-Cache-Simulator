@@ -40,26 +40,6 @@ Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*>* jobQueue)
 
 }
 
-void Cache::setThings(int pId, CacheConstants consts, std::queue<CacheJob*>* jobQueue)
-{
-	cacheConstants = consts;
-	//make a vector of the CacheSet 
-	localCache.resize(cacheConstants.getNumSets());
-	for (int i = 0; i < cacheConstants.getNumSets(); i++){
-		localCache[i] = new CacheSet(&consts);
-	}
-	processorId = pId;
-	pendingJobs = *jobQueue;
-	printf("number of pending jobs for cache %d (or is it %d ??) is %d \n", processorId, pId, pendingJobs.size());
-	currentJob = NULL;
-	busRequest = NULL;
-	haveBusRequest = false;
-	busy = false;
-	startServiceCycle = 0;
-	jobCycleCost = 0;
-
-}
-
 void Cache::setPId(int pid){
 	processorId = pid;
 }
@@ -299,6 +279,9 @@ if there is-> handleRequest()
 otherwise, maybe have a function to notify the CacheController that we're done?
 */
 void Cache::busJobDone(){
+	printf("cache %d has just been told it has finished a job \n", processorId);
+
+
 	unsigned long long jobAddr = (*currentJob).getAddress();
 	int currJobSet = 0;
 	int currJobTag = 0;
@@ -306,7 +289,6 @@ void Cache::busJobDone(){
 
 	haveBusRequest = false;
 	busy = false;
-	//IS THIS THE RIGHT WAY TO ACCESS A SET?!??!
 	CacheSet* currSet = localCache[currJobSet];
 
 	//Need to tell if we need to evict a line from the set

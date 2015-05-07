@@ -4,8 +4,7 @@
 #include "CacheConstants.h"
 #include "limits.h"
 
-std::vector<CacheLine*> allLines;
-CacheConstants* consts;
+
 
 CacheSet::CacheSet(CacheConstants* constants)
 {

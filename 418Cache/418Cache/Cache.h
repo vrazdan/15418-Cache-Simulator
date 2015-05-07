@@ -39,7 +39,6 @@ public:
 	void decode_address(unsigned long long address, int* whichSet, int* tag);
 	unsigned long long getTotalMemoryCost(int set, int tag);
 	bool lineInState(CacheLine::State state);
-	void setThings(int pId, CacheConstants consts, std::queue<CacheJob*>* jobQueue);
 	BusRequest* getBusRequest();
 	Cache::SnoopResult snoopBusRequest(BusRequest*);
 	~Cache(void);

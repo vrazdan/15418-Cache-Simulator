@@ -6,21 +6,6 @@
 #include "BusRequest.h"
 
 
-//current cache that had/has bus access
-int currentCache;
-//current bus request being served
-BusRequest* currentRequest;
-bool inUse;
-//which cycle we started a job on
-unsigned long long startCycle; 
-//what cycle we will end a job on
-unsigned long long endCycle;
-CacheConstants constants;
-//current job being worked on that has the bus access
-CacheJob currentJob;
-//list of all the caches in the system
-std::vector<Cache*> caches;
-
 AtomicBusManager::AtomicBusManager(CacheConstants consts, std::vector<Cache*>* allCaches)
 {
 	constants = consts;
@@ -55,8 +40,8 @@ void AtomicBusManager::tick(){
 	for(int i = currentCache + 1; (i % constants.getNumProcessors()) != currentCache; i++){
 		if(((caches.at(i%(constants.getNumProcessors()))) != NULL) && (*caches.at(i%(constants.getNumProcessors()))).hasBusRequest()){
 			//so we will now service this cache
-			currentRequest = (*caches.at(i)).getBusRequest();
-			tempNextCache = i;
+			currentRequest = (*caches.at(i% constants.getNumProcessors())).getBusRequest();
+			tempNextCache = (i % constants.getNumProcessors());;
 			printf("found a cache to service, it's cache %d \n", tempNextCache);
 			break;
 		}

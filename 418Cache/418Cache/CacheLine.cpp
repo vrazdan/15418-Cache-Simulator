@@ -6,12 +6,6 @@ Depending upon what protocol it is (defined in constants?), line will act differ
 can just use an enum for the different states (modified, shared, invalid, exlusive shared, o = lolwut
 */
 
-unsigned long long rawAddress; //raw address that maps to me (ignoring block offset)
-int setIndex; //what set i'm in
-int myTag; //unique tag identifier
-CacheLine::State myState;
-
-
 CacheLine::CacheLine(unsigned long long address, int set, int tag)
 {
 	rawAddress = address;

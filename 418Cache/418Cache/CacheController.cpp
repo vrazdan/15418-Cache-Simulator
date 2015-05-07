@@ -45,11 +45,6 @@ int main(int argc, char* argv[]){
 
 	//keep track of all jobs that the processors have to do
 	std::vector<std::queue<CacheJob*> > outstandingRequests (numProcessors); 
-
-	//TODO: change this into accepting file names from a Traces/ folder in the same directory
-	/* right now assuming only argument passed in is the name of the trace 
-	file that I am assuming is in the same directory that I'm in right now
-	*/
 	
 	char* filename = argv[1];
 	if(filename == NULL){
@@ -62,34 +57,30 @@ int main(int argc, char* argv[]){
 		exit(0);
 	}
 	
-
-
 	while(getline(tracefile, line)){
 		//so while there are lines to read from the trace
 		sscanf(line.c_str(), "%c %llx %u", &readWrite, &address, &threadId);
 		accessProcessorId = (threadId % numProcessors);
-		//so accessProcessorId is now the # of the cache that is responsible
-		//for this thread
-
+		//so accessProcessorId is now the # of the cache that is responsible for the thread
 		outstandingRequests.at(accessProcessorId).push(new CacheJob(readWrite, address, threadId));
 		printf("rw:%c addr:%llX threadId:%d \n", readWrite, address, threadId);
 	}
 
 
 	for(int i = 0; i < constants.getNumProcessors(); i++){
-		printf("number of jobs cache %d SHOULD have is %d \n", i, outstandingRequests.at(i).size());
+		//printf("number of jobs cache %d SHOULD have is %d \n", i, outstandingRequests.at(i).size());
 		caches.push_back(new Cache(i, constants, &outstandingRequests.at(i)));
-		printf("caches[%d] pId is %d address is %x \n", i, (*caches[i]).getProcessorId(), caches[i]);
-		for(int y = 0; y < i; y++){
-			printf("inside the for loop, up to this point cache %d pId is %d at addr %x \n", y, (*caches[y]).getProcessorId(), caches[y]);
-		}
+		//printf("caches[%d] pId is %d address is %x \n", i, (*caches[i]).getProcessorId(), caches[i]);
+		//for(int y = 0; y < i; y++){
+			//printf("inside the for loop, up to this point cache %d pId is %d at addr %x \n", y, (*caches[y]).getProcessorId(), caches[y]);
+		//}
 	}
-
+	/*
 	for(std::vector<Cache*>::iterator it = caches.begin(); it != caches.end(); ++it){
 		printf("%d \n",(*(*it)).getProcessorId());
 	}
 	printf("\n len vector is %d \n", caches.size());
-	
+	*/
 	//so now all queues are full with the jobs they need to run
 	bus = new AtomicBusManager(constants, &caches);
 
@@ -99,7 +90,7 @@ int main(int argc, char* argv[]){
 		constants.tick();
 		//then call for all the caches
 		for(int j = 0; j < numProcessors; j++){
-			printf("trying to tick for cache %d, actually ticking cache %d \n", j, (*caches.at(j)).getProcessorId());
+			//printf("trying to tick for cache %d, actually ticking cache %d \n", j, (*caches.at(j)).getProcessorId());
 			(*caches.at(j)).tick();
 		}
 		//then call the bus manager
