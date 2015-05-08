@@ -11,7 +11,7 @@ CacheSet::CacheSet(CacheConstants* constants)
 	consts = constants;
 	//set it so that the size is for the number of lines in a set
 	//so don't need to allocate memory later for it
-	allLines.resize((*consts).getNumLinesInSet());
+	//allLines.resize((*consts).getNumLinesInSet());
 }
 
 bool CacheSet::isFull()

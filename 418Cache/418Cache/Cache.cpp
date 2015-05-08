@@ -103,7 +103,7 @@ then call handleRequest
 else, jack off
 */
 void Cache::handleRequest(){
-	if (currentJob == NULL){
+	if (!busy){
 		//so there are still jobs and we're not doing one right now
 		printf("inside handlerequest, the size of pending jobs is %d for cache %d \n", pendingJobs.size(), processorId);
 		if(!pendingJobs.empty()){
@@ -316,6 +316,7 @@ void Cache::busJobDone(){
 		//Set the line's state to Shared
 		(*currLine).setState(CacheLine::shared);
 	}
+	//currentJob = NULL;
 }
 
 
@@ -327,7 +328,15 @@ int Cache::getProcessorId(){
 
 void Cache::tick(){
 	printf("cache %d is now in tick and num jobs is %d \n", processorId, pendingJobs.size());
-	if(!busy){
+	if(startServiceCycle + jobCycleCost <= cacheConstants.getCycle()){
+		//so now we done a job, yay
+		busy = false;
+		//if(haveBusRequest){
+		//	//so the job did not need the bus
+		//}
+	}
+
+	if(!busy && pendingJobs.size() != 0){
 		//so we're free to do a new request
 		handleRequest();
 	}

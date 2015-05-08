@@ -21,10 +21,10 @@ CacheController::~CacheController(void)
 
 
 
-bool queuesEmpty(std::vector<std::queue<CacheJob*> > requests, int numProcessors){
+bool queuesEmpty(std::vector<Cache*> caches){
 	bool allEmpty = true;
-	for(int i = 0; i < numProcessors; i++){
-		if(!requests[i].empty()){
+	for(int i = 0; i < caches.size(); i++){
+		if((*caches[i]).pendingJobs.size() != 0){
 			allEmpty = false;
 		}
 	}
@@ -84,7 +84,7 @@ int main(int argc, char* argv[]){
 	//so now all queues are full with the jobs they need to run
 	bus = new AtomicBusManager(constants, &caches);
 
-	while(!queuesEmpty(outstandingRequests, numProcessors)){
+	while(!queuesEmpty(caches)){
 	
 		//time must first increment for the constants
 		constants.tick();

@@ -26,6 +26,7 @@ void AtomicBusManager::tick(){
 		if(endCycle <= constants.getCycle()){
 			//tell the cache that its job is done
 			(*caches.at(currentCache)).busJobDone();
+			currentCache = -1;
 			inUse = false;
 		}
 		else{
@@ -37,6 +38,17 @@ void AtomicBusManager::tick(){
 	//so either not in use, or we just finished a job
 	//loop for all processors starting from next 
 	printf("currentCache in atomicbusmanager is %d \n", currentCache);
+	for(int i = 0; i < constants.getNumProcessors(); i++){
+		if(((caches.at(i)) != NULL) && (*caches.at(i)).hasBusRequest()){
+			//so we will now service this cache
+			currentRequest = (*caches.at(i)).getBusRequest();
+			tempNextCache = i;
+			printf("found a cache to service, it's cache %d \n", tempNextCache);
+			break;
+		}
+	}
+	//stupid round robin stuff or whatever
+	/*
 	for(int i = currentCache + 1; (i % constants.getNumProcessors()) != currentCache; i++){
 		if(((caches.at(i%(constants.getNumProcessors()))) != NULL) && (*caches.at(i%(constants.getNumProcessors()))).hasBusRequest()){
 			//so we will now service this cache
@@ -46,6 +58,7 @@ void AtomicBusManager::tick(){
 			break;
 		}
 	}
+	
 	if(tempNextCache == -1){
 		//so we didn't find anyone else who had a request, so see if currentCache can
 		printf("didn't find anyone to service, checking current cache \n");
@@ -55,6 +68,7 @@ void AtomicBusManager::tick(){
 			tempNextCache = currentCache;
 		}
 	}
+	*/
 	
 	if(tempNextCache == -1){
 		//so there are no more pending requests in the system
