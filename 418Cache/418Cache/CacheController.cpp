@@ -18,9 +18,6 @@ CacheController::~CacheController(void)
 {
 }
 
-
-
-
 bool queuesEmpty(std::vector<Cache*> caches){
 	bool allEmpty = true;
 	for(int i = 0; i < caches.size(); i++){
@@ -45,7 +42,7 @@ int main(int argc, char* argv[]){
 
 	//keep track of all jobs that the processors have to do
 	std::vector<std::queue<CacheJob*> > outstandingRequests (numProcessors); 
-	
+
 	char* filename = argv[1];
 	if(filename == NULL){
 		printf("Error, no filename given");
@@ -56,7 +53,7 @@ int main(int argc, char* argv[]){
 		printf("Error opening the tracefile, try again");
 		exit(0);
 	}
-	
+
 	while(getline(tracefile, line)){
 		//so while there are lines to read from the trace
 		sscanf(line.c_str(), "%c %llx %u", &readWrite, &address, &threadId);
@@ -68,29 +65,18 @@ int main(int argc, char* argv[]){
 
 
 	for(int i = 0; i < constants.getNumProcessors(); i++){
-		//printf("number of jobs cache %d SHOULD have is %d \n", i, outstandingRequests.at(i).size());
+		printf("number of jobs cache %d has is %d \n", i, outstandingRequests.at(i).size());
 		caches.push_back(new Cache(i, constants, &outstandingRequests.at(i)));
-		//printf("caches[%d] pId is %d address is %x \n", i, (*caches[i]).getProcessorId(), caches[i]);
-		//for(int y = 0; y < i; y++){
-			//printf("inside the for loop, up to this point cache %d pId is %d at addr %x \n", y, (*caches[y]).getProcessorId(), caches[y]);
-		//}
 	}
-	/*
-	for(std::vector<Cache*>::iterator it = caches.begin(); it != caches.end(); ++it){
-		printf("%d \n",(*(*it)).getProcessorId());
-	}
-	printf("\n len vector is %d \n", caches.size());
-	*/
+
 	//so now all queues are full with the jobs they need to run
 	bus = new AtomicBusManager(constants, &caches);
 
 	while(!queuesEmpty(caches)){
-	
 		//time must first increment for the constants
 		constants.tick();
 		//then call for all the caches
 		for(int j = 0; j < numProcessors; j++){
-			//printf("trying to tick for cache %d, actually ticking cache %d \n", j, (*caches.at(j)).getProcessorId());
 			(*caches.at(j)).tick();
 		}
 		//then call the bus manager
@@ -99,7 +85,7 @@ int main(int argc, char* argv[]){
 	}
 
 	printf("yo we done ayyy");
-	
+
 
 	for(int i = 0; i < numProcessors; i++){
 		delete caches[i];

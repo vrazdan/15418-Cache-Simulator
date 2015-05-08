@@ -62,7 +62,6 @@ int CacheConstants::getNumBytesBits(){
 	return numBytesBits;
 }
 
-
 int CacheConstants::getCacheHitCycleCost(){
 	return cacheHitCycleCost;
 }

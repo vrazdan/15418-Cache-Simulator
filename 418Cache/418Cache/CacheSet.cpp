@@ -5,13 +5,13 @@
 #include "limits.h"
 
 
-
+/*
+Container of the lines for an individual set.
+Manages requests for lines and LRU eviction
+*/
 CacheSet::CacheSet(CacheConstants* constants)
 {
 	consts = constants;
-	//set it so that the size is for the number of lines in a set
-	//so don't need to allocate memory later for it
-	//allLines.resize((*consts).getNumLinesInSet());
 }
 
 bool CacheSet::isFull()
@@ -51,6 +51,9 @@ CacheLine* CacheSet::getLine(int tag){
 	return NULL;
 }
 
+/*
+Remove the oldest line in the set
+*/
 void CacheSet::evictLRULine()
 {
 	unsigned long long leastRecentCycle = ULLONG_MAX;

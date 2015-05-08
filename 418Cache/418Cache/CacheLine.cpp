@@ -2,10 +2,8 @@
 #include "CacheConstants.h"
 
 /*
-Depending upon what protocol it is (defined in constants?), line will act differently
-can just use an enum for the different states (modified, shared, invalid, exlusive shared, o = lolwut
+Represents a single line in the cache.
 */
-
 CacheLine::CacheLine(unsigned long long address, int set, int tag)
 {
 	rawAddress = address;

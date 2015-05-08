@@ -8,7 +8,6 @@ CacheJob::CacheJob(char readWrite, unsigned long long addr, int tId)
 	rW = readWrite;
 	address = addr;
 	threadId = tId;
-
 }
 
 bool CacheJob::isRead(){

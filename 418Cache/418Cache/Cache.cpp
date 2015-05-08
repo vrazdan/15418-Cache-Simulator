@@ -9,17 +9,9 @@
 #include "CacheLine.h"
 
 /*
-So this is the main class for handling a processors cache.
-Will need to have multiple CacheSet classes
-where a CacheSet is a wrapper for a list of CacheLine
-
-Cache will have to manage not only a LRU policy for the cache,
-but also manage asking for bus access, stalling, snooping
-for the bus accesses, updating the state of the lines in the cache, 
-and more.
+Manages generating busrequests, handles processing of all the processor's requests,
+and maintains its own LRU cache
 */
-
-
 Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*>* jobQueue)
 {
 	cacheConstants = consts;
@@ -30,7 +22,6 @@ Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*>* jobQueue)
 	}
 	processorId = pId;
 	pendingJobs = *jobQueue;
-	printf("number of pending jobs for cache %d (or is it %d ??) is %d \n", processorId, pId, pendingJobs.size());
 	currentJob = NULL;
 	busRequest = NULL;
 	haveBusRequest = false;
@@ -97,20 +88,15 @@ bool Cache::lineInState(CacheLine::State state){
 
 
 /*
-every tick
-if we don't currently doing shit
-then call handleRequest
-else, jack off
+process a cache request, and ask for bus usage if necessary
 */
 void Cache::handleRequest(){
 	if (!busy){
 		//so there are still jobs and we're not doing one right now
-		printf("inside handlerequest, the size of pending jobs is %d for cache %d \n", pendingJobs.size(), processorId);
 		if(!pendingJobs.empty()){
 			currentJob = pendingJobs.front();
 			pendingJobs.pop();
 			printf("lets make a job for cache %d \n", processorId);
-
 			if((*currentJob).isWrite()){
 				//so if in the MSI protocol
 				if(cacheConstants.getProtocol() == CacheConstants::MSI){
@@ -122,13 +108,8 @@ void Cache::handleRequest(){
 						haveBusRequest = false;
 					}
 					else{
-						/*
-						Need to do a bus request since we don't have the line in modified
-						either in shared or invalid or just not have it
-						*/
 						haveBusRequest = true;
-						busy = true; //aren't i almost always busy, unless no req?
-						//^ i guess busy depends on if i'm properly timing my stalls or not
+						busy = true;
 						int set = 0;
 						int tag = 0;
 						decode_address((*currentJob).getAddress(), &set, &tag);
@@ -144,25 +125,19 @@ void Cache::handleRequest(){
 			if((*currentJob).isRead()){
 				if(cacheConstants.getProtocol() == CacheConstants::MSI){
 					if(lineInState(CacheLine::modified) || lineInState(CacheLine::shared)){
-						//so we have the line at least
-						//so we can read fine
+						//cache hit
 						haveBusRequest = false;
 						busy = true;
 						startServiceCycle = cacheConstants.getCycle();
 						jobCycleCost = cacheConstants.getCacheHitCycleCost();
 					}
 					else{
-						//regardless of if it's in invalid state
-						//or we just don't ahve it
-						//we're gonna have to read it from somewhere
-
 						//so we need to issue a request for the line
 						haveBusRequest = true;
 						busy = true;
 						int set = 0;
 						int tag = 0;
 						decode_address((*currentJob).getAddress(), &set, &tag);
-						//the cycle cost can be changed for different protocols and such
 						busRequest = new BusRequest(BusRequest::BusRd, set, tag,
 							cacheConstants.getMemoryResponseCycleCost());
 						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
@@ -178,7 +153,7 @@ bool Cache::hasBusRequest(){
 	return haveBusRequest;
 }
 
-//return the current busRequest / one that is needed
+//return the current busRequest 
 BusRequest* Cache::getBusRequest(){
 	printf("cache %d got able to put out a bus request \n", processorId);
 	startServiceCycle = cacheConstants.getCycle();
@@ -192,23 +167,6 @@ and parse it to see if you need to update our own local cache
 Cache::SnoopResult Cache::snoopBusRequest(BusRequest* request){
 
 	SnoopResult result = NONE;
-	/*
-	For write back snooping, we will have it so that 
-		1) if it's a read and we share the line, then busmanager picks the highest 
-				# cache to service it and we can somehow end the job early
-		2) if its a read and we have in modified
-				we flush to the bus and memory, so that the person who is listening 
-				gets the data, but still ahve to wait the full time for memory to get it
-				and make our version shared
-		3) if its a read and we dont have it
-				do nothing
-		4) if it's a readx and we're in shared
-			just set our line to invalid
-		5) if readx and w're in modified
-			set out to invalid
-			flush our data out to the bus so it can update memory and such
-	we can end up having variable length bus job accesses on how hard we try
-	*/
 	CacheSet* tempSet = localCache[(*request).getSet()];
 	if((*tempSet).hasLine((*request).getTag())){
 		//so we do have this line
@@ -218,13 +176,8 @@ Cache::SnoopResult Cache::snoopBusRequest(BusRequest* request){
 			if((*request).getCommand() == BusRequest::BusRd){
 				//so a bus read
 				if((*tempLine).getState() == CacheLine::shared){
-					//we share the line
-					//so notify the busmanager we have the line
-					//and the busmanager will select one cache to give the data
-					//and will provide that to the requesting cache
-					//and technically we don't have to wait since no memory involved
-					//However, we are assuming that the bus controller will fetch
-					//the data from memory anyways
+					//could have a cache respond with the data needed
+					//but we just let main memory handle it
 					result = Cache::SHARED;
 					return result;
 				}//shared
@@ -243,13 +196,7 @@ Cache::SnoopResult Cache::snoopBusRequest(BusRequest* request){
 			if ((*request).getCommand() == BusRequest::BusRdX)
 			{
 				if((*tempLine).getState() == CacheLine::shared){
-					//we share the line
-					//so notify the busmanager we have the line
-					//and the busmanager will select one cache to give the data
-					//and will provide that to the requesting cache
-					//and technically we don't have to wait since no memory involved
-					//However, we are assuming that the bus controller will fetch
-					//the data from memory anyways
+					//invalidate our line
 					(*tempLine).setState(CacheLine::invalid);
 					return result;
 				}//shared
@@ -273,15 +220,10 @@ Cache::SnoopResult Cache::snoopBusRequest(BusRequest* request){
 
 
 /*
-Delete current job
-Look at queue if there is another job for us to do
-if there is-> handleRequest()
-otherwise, maybe have a function to notify the CacheController that we're done?
+Update to store the new line requested
 */
 void Cache::busJobDone(){
 	printf("cache %d has just been told it has finished a job \n", processorId);
-
-
 	unsigned long long jobAddr = (*currentJob).getAddress();
 	int currJobSet = 0;
 	int currJobTag = 0;
@@ -302,7 +244,6 @@ void Cache::busJobDone(){
 	if (!(*currSet).hasLine(currJobTag))
 	{
 		CacheLine* newLine = new CacheLine(jobAddr, currJobSet, currJobTag);
-		//(*currSet).allLines().push_back(newLine);	
 		(*currSet).addLine(newLine);
 	}
 
@@ -316,7 +257,6 @@ void Cache::busJobDone(){
 		//Set the line's state to Shared
 		(*currLine).setState(CacheLine::shared);
 	}
-	//currentJob = NULL;
 }
 
 
@@ -327,13 +267,9 @@ int Cache::getProcessorId(){
 
 
 void Cache::tick(){
-	printf("cache %d is now in tick and num jobs is %d \n", processorId, pendingJobs.size());
 	if(startServiceCycle + jobCycleCost <= cacheConstants.getCycle()){
-		//so now we done a job, yay
+		//finished a job
 		busy = false;
-		//if(haveBusRequest){
-		//	//so the job did not need the bus
-		//}
 	}
 
 	if(!busy && pendingJobs.size() != 0){
@@ -343,5 +279,5 @@ void Cache::tick(){
 }
 
 Cache::~Cache(void){
-	
+
 }
