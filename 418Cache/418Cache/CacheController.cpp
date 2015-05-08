@@ -87,10 +87,9 @@ int main(int argc, char* argv[]){
 		//time must first increment for the constants
 		constants.tick();
 		//then call for all the caches
-		//if (queuesEmpty(caches))
 		if(noJobs(caches))
 		{
-			printf("at cycle %u we process a new job \n", constants.getCycle());
+			printf("at cycle %llu we process a new job \n", constants.getCycle());
 			CacheJob* currJob = outstandingRequests.front();
 			outstandingRequests.pop();
 			int currThread = (*currJob).getThreadId();
@@ -104,7 +103,7 @@ int main(int argc, char* argv[]){
 
 	}
 
-	printf("yo we done ayyy");
+	printf("finished at cycle %llu \n", constants.getCycle());
 
 
 	for(int i = 0; i < numProcessors; i++){

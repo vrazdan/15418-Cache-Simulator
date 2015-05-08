@@ -7,7 +7,8 @@ public:
 	int lineSet;
 	int lineTag;
 	int cycleCost;
-	BusRequest(BusMessage, int, int, int);
+	unsigned long long address;
+	BusRequest(BusMessage, int, int, int, unsigned long long);
 	BusMessage getCommand();
 	int getSet();
 	int getTag();
