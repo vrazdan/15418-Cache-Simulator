@@ -29,20 +29,22 @@ public:
 	bool busRequestBeingServiced;
 	unsigned long long startServiceCycle;
 	unsigned long long jobCycleCost;
+	CacheLine::State currentBusJobResultState;
 
 
 	void updateEndCycleTime(unsigned long long);
-	typedef enum {SHARED, FLUSH, NONE} SnoopResult;	 
+	typedef enum {SHARED, FLUSH_MODIFIED_TO_SHARED,FLUSH_MODIFIED_TO_INVALID, NONE} SnoopResult;	 
 	Cache(int, CacheConstants,std::queue<CacheJob*>*, CacheStats*);
 	int getProcessorId();
 	void setPId(int);
 	void handleRequest();
 	void tick();
-	void busJobDone();
+	void busJobDone(bool);
 	bool hasBusRequest();
 	void decode_address(unsigned long long address, int* whichSet, int* tag);
 	unsigned long long getTotalMemoryCost(int set, int tag);
 	bool lineInState(CacheLine::State state);
+	void setLineState(CacheLine::State state);
 	BusRequest* getBusRequest();
 	Cache::SnoopResult snoopBusRequest(BusRequest*);
 	~Cache(void);

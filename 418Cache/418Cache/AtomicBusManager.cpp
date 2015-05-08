@@ -14,6 +14,7 @@ AtomicBusManager::AtomicBusManager(CacheConstants consts, std::vector<Cache*>* a
 	startCycle = 0;
 	endCycle = 0;
 	inUse = false;
+	isShared = false;
 }
 
 //Handle checking if the current BusRequest is completed
@@ -24,9 +25,10 @@ void AtomicBusManager::tick(){
 		//so the current job being executed is completed this cycle 
 		if(endCycle <= constants.getCycle()){
 			//tell the cache that its job is done
-			(*caches.at(currentCache)).busJobDone();
+			(*caches.at(currentCache)).busJobDone(isShared);
 			currentCache = -1;
 			inUse = false;
+			isShared = false;
 		}
 		else{
 			return;
@@ -61,18 +63,15 @@ void AtomicBusManager::tick(){
 	endCycle = startCycle + (*currentRequest).getCycleCost(); 
 	inUse = true;
 
+
 	//so now we have the new currentRequest and currentCache is the cache that asked for that request
 	//so now we broadcast this currentRequest to all the caches other than the one who sent it
 	for(int i = 0; i < constants.getNumProcessors(); i++){
 		if(i != currentCache){
-			/*
-			TODO: we do not take into accout other caches saying if the line is dirty or shared or not
-			so like, if the memory has to respond or not? but i think that's just for MESI/moesi
-			*/
 			Cache::SnoopResult result = (*caches.at(i)).snoopBusRequest(currentRequest);
 			if(constants.getProtocol() == CacheConstants::MSI){
 				{
-					if (result == Cache::FLUSH)
+					if (result == Cache::FLUSH_MODIFIED_TO_SHARED || result == Cache::FLUSH_MODIFIED_TO_INVALID)
 					{
 						endCycle += constants.getMemoryResponseCycleCost();
 						(*caches[currentCache]).updateEndCycleTime(constants.getMemoryResponseCycleCost());
@@ -89,11 +88,37 @@ void AtomicBusManager::tick(){
 						continue;
 					}
 				}
-
+			}
+			if(constants.getProtocol() == CacheConstants::MESI){
+				if(result == Cache::FLUSH_MODIFIED_TO_INVALID){
+					endCycle += constants.getMemoryResponseCycleCost();
+					(*caches[currentCache]).updateEndCycleTime(constants.getMemoryResponseCycleCost());
+					//so requesting cache should set the line to modified
+					//this happens from a busrdx command
+				}
+				if(result == Cache::FLUSH_MODIFIED_TO_SHARED){
+					//so this happens when there is a busrd req
+					endCycle += constants.getMemoryResponseCycleCost();
+					(*caches[currentCache]).updateEndCycleTime(constants.getMemoryResponseCycleCost());
+					//so tell the cache that it shoudl set the line to shared
+					isShared = true;
+				}
+				if(result == Cache::SHARED){
+					isShared = true;
+				}
+				if(result == Cache::NONE){
+					//nothing
+				}
 			}
 		}
 		//so now all caches have acknowledged the new BusRequest that was issued
 	}
+
+	//all caches ack the bus request
+	//now for mesi, we tell the requesting cache if it should set the line it gets to exclusive or shared, if it was a rd req
+	//if a write req, it should always go to modified
+
+
 }
 
 

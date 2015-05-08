@@ -20,6 +20,8 @@ public:
 	CacheJob currentJob;
 	//list of all the caches in the system
 	std::vector<Cache*> caches;
+	//result of if a line for a busrequest is shared or not
+	bool isShared;
 	void tick(void);
 	~AtomicBusManager(void);
 };
