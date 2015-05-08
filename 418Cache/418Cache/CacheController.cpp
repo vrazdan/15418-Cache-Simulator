@@ -19,6 +19,8 @@ CacheController::~CacheController(void)
 }
 
 
+
+
 bool queuesEmpty(std::vector<std::queue<CacheJob*> > requests, int numProcessors){
 	bool allEmpty = true;
 	for(int i = 0; i < numProcessors; i++){
@@ -55,7 +57,7 @@ int main(int argc, char* argv[]){
 		exit(0);
 	}
 	std::ifstream tracefile(filename);
-	if(tracefile == NULL){
+	if(!tracefile){
 		printf("Error opening the tracefile, try again");
 		exit(0);
 	}
@@ -116,13 +118,11 @@ caches = std::vector<Cache*>(tmparray, tmparray + sizeof(tmparray)/sizeof(Cache*
 
 	for(int i = 0; i < constants.getNumProcessors(); i++){
 		printf("number of jobs cache %d SHOULD have is %d \n", i, outstandingRequests.at(i).size());
-		Cache* temp = new Cache(i, constants, &outstandingRequests.at(i));
-		printf("temp pid is %d \n", (*temp).getProcessorId());
-		std::vector<Cache*>::iterator itt = caches.end();
-		caches.insert(itt, temp);
-		//caches.push_back(temp);
+		Cache temp = Cache(i, constants, &outstandingRequests.at(i));
+		printf("temp pid is %d \n", (temp).getProcessorId());
+		caches.push_back(&temp);
 		//caches.push_back(new Cache(i, constants, &outstandingRequests.at(i)));
-		printf("caches[%d] pId is %d address is %x \n", i, (*caches[i]).getProcessorId(), temp);
+		printf("caches[%d] pId is %d address is %x \n", i, (*caches[i]).getProcessorId(), &temp);
 		for(int y = 0; y < i; y++){
 			printf("inside the for loop, up to this point cache %d pId is %d at addr %x \n", y, (*caches[y]).getProcessorId(), caches[y]);
 		}
