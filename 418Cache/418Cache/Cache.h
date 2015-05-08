@@ -31,7 +31,6 @@ public:
 	unsigned long long jobCycleCost;
 	CacheLine::State currentBusJobResultState;
 
-
 	void updateEndCycleTime(unsigned long long);
 	typedef enum {SHARED, FLUSH_MODIFIED_TO_SHARED,FLUSH_MODIFIED_TO_INVALID, NONE} SnoopResult;	 
 	Cache(int, CacheConstants,std::queue<CacheJob*>*, CacheStats*);
@@ -48,5 +47,15 @@ public:
 	BusRequest* getBusRequest();
 	Cache::SnoopResult snoopBusRequest(BusRequest*);
 	~Cache(void);
+private:
+	void handleWriteRequestMESI();
+	void handleReadRequestMESI();
+	void handleWriteRequestMSI();
+	void handleReadRequestMSI();
+	bool handleWriteModified();
+	bool handleWriteExclusive();
+	void handleWriteSharedInvalid();
+	bool handleReadHit();
+	void handleReadMiss();
 };
 

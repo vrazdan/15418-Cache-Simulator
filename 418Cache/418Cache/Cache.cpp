@@ -100,6 +100,127 @@ void Cache::setLineState(CacheLine::State state){
 	}
 }
 
+bool Cache::handleWriteModified(){
+	if(lineInState(CacheLine::modified)){
+		//so we can service this request ez
+		startServiceCycle = cacheConstants.getCycle();
+		jobCycleCost = cacheConstants.getCacheHitCycleCost();
+		busy = true;
+		haveBusRequest = false;
+		(*stats).numHit++;
+		printf("cache %d just got a cache hit on a PrWr request for address %llx in MODIFIED state at cycle %llu \n", 
+			processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
+		return true;
+	}
+	return false;
+}
+
+bool Cache::handleWriteExclusive(){
+	if(lineInState(CacheLine::exclusive)){
+		//so have to change the line state to modified
+		//but it's a hit so no need for bus
+		startServiceCycle = cacheConstants.getCycle();
+		jobCycleCost = cacheConstants.getCacheHitCycleCost();
+		busy = true;
+		haveBusRequest = false;
+		(*stats).numHit++;
+		//set it to modified state
+		setLineState(CacheLine::modified);
+		printf("cache %d just got a cache hit on a PrWr request for address %llx in EXCLUSIVE state, so changed to MODIFIED state at cycle %llu\n", 
+			processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
+		return true;
+	}
+	return false;
+}
+
+void Cache::handleWriteSharedInvalid(){
+	haveBusRequest = true;
+	busy = true;
+	int set = 0;
+	int tag = 0;
+	decode_address((*currentJob).getAddress(), &set, &tag);
+	//the cycle cost can be changed for different protocols and such
+	unsigned long long memoryCost = getTotalMemoryCost(set, tag);
+	(*stats).numMiss++;
+	busRequest = new BusRequest(BusRequest::BusRdX, set, tag,
+		memoryCost, (*currentJob).getAddress());
+	jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
+	printf("cache %d just got a cache miss(or was shared) on a PrWr request for address %llx at cycle %llu \n", 
+		processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
+
+}
+
+void Cache::handleWriteRequestMESI(){
+	//only difference here is that we have to case if we're in exclusive state
+
+	if(handleWriteModified()){
+		return;
+	}
+	else if(handleWriteExclusive()){
+		return;
+	}else{
+		handleWriteSharedInvalid();
+	}
+}
+
+
+void Cache::handleWriteRequestMSI(){
+	if(handleWriteModified()){
+		return;
+	}
+	else{
+		handleWriteSharedInvalid();
+	}
+}
+
+bool Cache::handleReadHit(){
+	if(lineInState(CacheLine::modified) || lineInState(CacheLine::shared) || lineInState(CacheLine::exclusive)){
+		//cache hit
+		haveBusRequest = false;
+		busy = true;
+		startServiceCycle = cacheConstants.getCycle();
+		jobCycleCost = cacheConstants.getCacheHitCycleCost();
+		(*stats).numHit++;
+		printf("cache %d just got a cache hit on a PrRd request for address %llx at cycle %llu \n",
+			processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
+		return true;
+	}
+	return false;
+}
+
+void Cache::handleReadMiss(){
+	//so we need to issue a request for the line
+	haveBusRequest = true;
+	busy = true;
+	int set = 0;
+	int tag = 0;
+	decode_address((*currentJob).getAddress(), &set, &tag);
+	busRequest = new BusRequest(BusRequest::BusRd, set, tag,
+		cacheConstants.getMemoryResponseCycleCost(), (*currentJob).getAddress());
+	jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
+	(*stats).numMiss++;
+	printf("cache %d just got a cache miss on a PrRd request for address %llx at cycle %llu \n",
+		processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
+}
+
+void Cache::handleReadRequestMESI(){
+	if(handleReadHit()){
+		return;
+	}
+	else{
+		handleReadMiss();
+	}
+}
+
+void Cache::handleReadRequestMSI(){
+	if(handleReadHit()){
+		return;
+	}
+	else{
+		handleReadMiss();
+	}
+}
+
 /*
 process a cache request, and ask for bus usage if necessary
 */
@@ -111,129 +232,22 @@ void Cache::handleRequest(){
 			pendingJobs.pop();
 			printf("lets make a job for cache %d at cycle %llu \n", processorId, cacheConstants.getCycle());
 			if((*currentJob).isWrite()){
-				//so if in the MSI protocol
 				if(cacheConstants.getProtocol() == CacheConstants::MSI){
-					if(lineInState(CacheLine::modified)){
-						//so we can service this request ez
-						startServiceCycle = cacheConstants.getCycle();
-						jobCycleCost = cacheConstants.getCacheHitCycleCost();
-						busy = true;
-						haveBusRequest = false;
-						(*stats).numHit++;
-						printf("cache %d just got a cache hit on a PrWr request for address %llx at cycle %llu \n", 
-							processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
-					}
-					else{
-						haveBusRequest = true;
-						busy = true;
-						int set = 0;
-						int tag = 0;
-						decode_address((*currentJob).getAddress(), &set, &tag);
-						//the cycle cost can be changed for different protocols and such
-						unsigned long long memoryCost = getTotalMemoryCost(set, tag);
-						(*stats).numMiss++;
-						busRequest = new BusRequest(BusRequest::BusRdX, set, tag,
-							memoryCost, (*currentJob).getAddress());
-						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
-						printf("cache %d just got a cache miss(or was shared) on a PrWr request for address %llx at cycle %llu \n", 
-							processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
-					}
+					handleWriteRequestMSI();
+					return;
 				}
 				if(cacheConstants.getProtocol() == CacheConstants::MESI){
-					//only difference here is that we have to case if we're in exclusive state
-					if(lineInState(CacheLine::modified)){
-						//so we can service this request ez
-						startServiceCycle = cacheConstants.getCycle();
-						jobCycleCost = cacheConstants.getCacheHitCycleCost();
-						busy = true;
-						haveBusRequest = false;
-						(*stats).numHit++;
-						printf("cache %d just got a cache hit on a PrWr request for address %llx in MODIFIED state at cycle %llu \n", 
-							processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
-					} else if(lineInState(CacheLine::exclusive)){
-						//so have to change the line state to modified
-						//but it's a hit so no need for bus
-						startServiceCycle = cacheConstants.getCycle();
-						jobCycleCost = cacheConstants.getCacheHitCycleCost();
-						busy = true;
-						haveBusRequest = false;
-						(*stats).numHit++;
-						//set it to modified state
-						setLineState(CacheLine::modified);
-						printf("cache %d just got a cache hit on a PrWr request for address %llx in EXCLUSIVE state, so changed to MODIFIED state at cycle %llu\n", 
-							processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
-					}
-					else{
-						haveBusRequest = true;
-						busy = true;
-						int set = 0;
-						int tag = 0;
-						decode_address((*currentJob).getAddress(), &set, &tag);
-						//the cycle cost can be changed for different protocols and such
-						unsigned long long memoryCost = getTotalMemoryCost(set, tag);
-						(*stats).numMiss++;
-						busRequest = new BusRequest(BusRequest::BusRdX, set, tag,
-							memoryCost, (*currentJob).getAddress());
-						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
-						printf("cache %d just got a cache miss(or was shared) on a PrWr request for address %llx at cycle %llu \n", 
-							processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
-					}
+					handleWriteRequestMESI();
+					return;
 				}
 			}
 			if((*currentJob).isRead()){
 				if(cacheConstants.getProtocol() == CacheConstants::MSI){
-					if(lineInState(CacheLine::modified) || lineInState(CacheLine::shared)){
-						//cache hit
-						haveBusRequest = false;
-						busy = true;
-						startServiceCycle = cacheConstants.getCycle();
-						jobCycleCost = cacheConstants.getCacheHitCycleCost();
-						(*stats).numHit++;
-						printf("cache %d just got a cache hit on a PrRd request for address %llx at cycle %llu \n",
-							processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
-					}
-					else{
-						//so we need to issue a request for the line
-						haveBusRequest = true;
-						busy = true;
-						int set = 0;
-						int tag = 0;
-						decode_address((*currentJob).getAddress(), &set, &tag);
-						busRequest = new BusRequest(BusRequest::BusRd, set, tag,
-							cacheConstants.getMemoryResponseCycleCost(), (*currentJob).getAddress());
-						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
-						(*stats).numMiss++;
-						printf("cache %d just got a cache miss on a PrRd request for address %llx at cycle %llu \n",
-							processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
-					}
+					handleReadRequestMSI();
 				}
 				if(cacheConstants.getProtocol() == CacheConstants::MESI)
 				{
-					if(lineInState(CacheLine::modified) || lineInState(CacheLine::shared) || lineInState(CacheLine::exclusive)){
-						//cache hit
-						haveBusRequest = false;
-						busy = true;
-						startServiceCycle = cacheConstants.getCycle();
-						jobCycleCost = cacheConstants.getCacheHitCycleCost();
-						(*stats).numHit++;
-						printf("cache %d just got a cache hit on a PrRd request for address %llx at cycle %llu \n",
-							processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
-					}
-					else{
-						//so we need to issue a request for the line
-						haveBusRequest = true;
-						busy = true;
-						int set = 0;
-						int tag = 0;
-						decode_address((*currentJob).getAddress(), &set, &tag);
-						busRequest = new BusRequest(BusRequest::BusRd, set, tag,
-							cacheConstants.getMemoryResponseCycleCost(), (*currentJob).getAddress());
-						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
-						(*stats).numMiss++;
-						printf("cache %d just got a cache miss on a PrRd request for address %llx at cycle %llu \n",
-							processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
-					}
-
+					handleReadRequestMESI();					
 				}
 			}
 		}
