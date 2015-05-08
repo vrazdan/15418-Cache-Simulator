@@ -11,6 +11,7 @@
 #include "queue"
 #include "BusRequest.h"
 #include "CacheLine.h"
+#include "CacheStats.h"
 
 class Cache
 {
@@ -21,6 +22,7 @@ public:
 	std::queue<CacheJob*> pendingJobs;
 	CacheJob* currentJob;
 	BusRequest* busRequest;
+	CacheStats* stats;
 	int processorId;
 	bool haveBusRequest;
 	bool busy;
@@ -30,7 +32,7 @@ public:
 
 	void updateEndCycleTime(unsigned long long);
 	typedef enum {SHARED, FLUSH, NONE} SnoopResult;	 
-	Cache(int, CacheConstants,std::queue<CacheJob*>* );
+	Cache(int, CacheConstants,std::queue<CacheJob*>*, CacheStats*);
 	int getProcessorId();
 	void setPId(int);
 	void handleRequest();

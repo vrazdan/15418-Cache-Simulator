@@ -7,6 +7,7 @@
 #include "Cache.h"
 #include <queue>
 #include "AtomicBusManager.h"
+#include "CacheStats.h"
 
 
 CacheController::CacheController(void)
@@ -50,6 +51,7 @@ int main(int argc, char* argv[]){
 	std::string line;
 	AtomicBusManager* bus;
 	std::vector<Cache*> caches;
+	CacheStats* stats = new CacheStats();
 
 	//keep track of all jobs that the processors have to do
 	std::queue<CacheJob*> outstandingRequests; 
@@ -77,7 +79,7 @@ int main(int argc, char* argv[]){
 	//Creating all of the caches and putting them into the caches vector
 	for(int i = 0; i < constants.getNumProcessors(); i++){
 		std::queue<CacheJob*> tempQueue;
-		caches.push_back(new Cache(i, constants, &tempQueue));
+		caches.push_back(new Cache(i, constants, &tempQueue, stats));
 	}
 
 	//so now all queues are full with the jobs they need to run
@@ -104,6 +106,7 @@ int main(int argc, char* argv[]){
 	}
 
 	printf("finished at cycle %llu \n", constants.getCycle());
+	printf("num hits: %llu num miss: %llu num flush: %llu num evicts: %llu \n", (*stats).numHit, (*stats).numMiss, (*stats).numFlush, (*stats).numEvict);
 
 
 	for(int i = 0; i < numProcessors; i++){

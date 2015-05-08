@@ -12,7 +12,7 @@
 Manages generating busrequests, handles processing of all the processor's requests,
 and maintains its own LRU cache
 */
-Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*>* jobQueue)
+Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*>* jobQueue, CacheStats* st)
 {
 	cacheConstants = consts;
 	//make a vector of the CacheSet 
@@ -28,6 +28,7 @@ Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*>* jobQueue)
 	busy = false;
 	startServiceCycle = 0;
 	jobCycleCost = 0;
+	stats = st;
 
 }
 
@@ -106,6 +107,7 @@ void Cache::handleRequest(){
 						jobCycleCost = cacheConstants.getCacheHitCycleCost();
 						busy = true;
 						haveBusRequest = false;
+						(*stats).numHit++;
 						printf("cache %d just got a cache hit on a PrWr request for address %llx \n", processorId, (*currentJob).getAddress());
 					}
 					else{
@@ -116,7 +118,7 @@ void Cache::handleRequest(){
 						decode_address((*currentJob).getAddress(), &set, &tag);
 						//the cycle cost can be changed for different protocols and such
 						unsigned long long memoryCost = getTotalMemoryCost(set, tag);
-
+						(*stats).numMiss++;
 						busRequest = new BusRequest(BusRequest::BusRdX, set, tag,
 							memoryCost, (*currentJob).getAddress());
 						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
@@ -133,6 +135,7 @@ void Cache::handleRequest(){
 						busy = true;
 						startServiceCycle = cacheConstants.getCycle();
 						jobCycleCost = cacheConstants.getCacheHitCycleCost();
+						(*stats).numHit++;
 						printf("cache %d just got a cache hit on a PrRd request for address %llx \n", processorId, (*currentJob).getAddress());
 
 					}
@@ -146,6 +149,7 @@ void Cache::handleRequest(){
 						busRequest = new BusRequest(BusRequest::BusRd, set, tag,
 							cacheConstants.getMemoryResponseCycleCost(), (*currentJob).getAddress());
 						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
+						(*stats).numMiss++;
 						printf("cache %d just got a cache miss on a PrRd request for address %llx \n", processorId, (*currentJob).getAddress());
 
 					}
@@ -195,6 +199,7 @@ Cache::SnoopResult Cache::snoopBusRequest(BusRequest* request){
 					//FLUSH LINE TO MEMORY
 					//and set the state to Shared
 					result = FLUSH;
+					(*stats).numFlush++;
 					printf("cache %d just flushed set %d and tag %d for address %llx \n", processorId, setNum, tagNum, (*request).address);
 					(*tempLine).setState(CacheLine::shared);
 					printf("cache number %d just changed set %d and tag %d for address %llx from modified to shared from a read \n", processorId, setNum, tagNum, (*request).address);
@@ -219,6 +224,7 @@ Cache::SnoopResult Cache::snoopBusRequest(BusRequest* request){
 					//FLUSH LINE TO MEMORY
 					//and set the state to invalid
 					result = FLUSH;
+					(*stats).numFlush++;
 					printf("cache %d just flushed set %d and tag %d \n", processorId, setNum, tagNum);
 					(*tempLine).setState(CacheLine::invalid);
 					printf("cache number %d just changed set %d and tag %d for address %llx from modified to invalid from a ReadX \n", processorId, setNum, tagNum, (*request).address);
@@ -259,6 +265,7 @@ void Cache::busJobDone(){
 	{
 		//Evict the line
 		(*currSet).evictLRULine();
+		(*stats).numEvict++;
 	}
 
 	if (!(*currSet).hasLine(currJobTag))
@@ -278,7 +285,6 @@ void Cache::busJobDone(){
 		(*currLine).setState(CacheLine::shared);
 	}
 	printf("cache %d has just been told it has finished a job for address %llx at cycle %llu \n", processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
-
 }
 
 
