@@ -76,63 +76,14 @@ int main(int argc, char* argv[]){
 	}
 
 
-	Cache* temp;
-for(int i = 0; i < constants.getNumProcessors(); i++){
+	for(int i = 0; i < constants.getNumProcessors(); i++){
 		printf("number of jobs cache %d SHOULD have is %d \n", i, outstandingRequests.at(i).size());
-		temp = new Cache(i, constants, &outstandingRequests.at(i));
-		printf("temp pid is %d \n", (*temp).getProcessorId());
-		std::vector<Cache*>::iterator itt = caches.end();
-		caches.insert(itt, temp);
-		//caches.push_back(temp);
-		//caches.push_back(new Cache(i, constants, &outstandingRequests.at(i)));
-		printf("caches[%d] pId is %d address is %x \n", i, (*caches[i]).getProcessorId(), temp);
+		caches.push_back(new Cache(i, constants, &outstandingRequests.at(i)));
+		printf("caches[%d] pId is %d address is %x \n", i, (*caches[i]).getProcessorId(), caches[i]);
 		for(int y = 0; y < i; y++){
 			printf("inside the for loop, up to this point cache %d pId is %d at addr %x \n", y, (*caches[y]).getProcessorId(), caches[y]);
 		}
 	}
-
-
-
-
-	/*
-	Cache* tmparray[8];
-for(int i = 0; i < constants.getNumProcessors(); i++){
-	printf("number of jobs cache %d SHOULD have is %d \n", i, outstandingRequests.at(i).size());
-	Cache* temp = new Cache(i, constants, &outstandingRequests.at(i));
-	tmparray[i] = temp;
-	printf("temp pid is %d \n", (*temp).getProcessorId());
-	printf("caches[%d] pId is %d address is %x \n", i, (*tmparray[i]).getProcessorId(), temp);
-	for(int y = 0; y < i; y++){
-		printf("inside the for loop, up to this point cache %d pId is %d at addr %x \n", y, (*tmparray[y]).getProcessorId(), tmparray[y]);
-	}
-}
-caches = std::vector<Cache*>(tmparray, tmparray + sizeof(tmparray)/sizeof(Cache*));
-*/
-
-
-
-
-
-
-
-
-	for(int i = 0; i < constants.getNumProcessors(); i++){
-		printf("number of jobs cache %d SHOULD have is %d \n", i, outstandingRequests.at(i).size());
-		Cache temp = Cache(i, constants, &outstandingRequests.at(i));
-		printf("temp pid is %d \n", (temp).getProcessorId());
-		caches.push_back(&temp);
-		//caches.push_back(new Cache(i, constants, &outstandingRequests.at(i)));
-		printf("caches[%d] pId is %d address is %x \n", i, (*caches[i]).getProcessorId(), &temp);
-		for(int y = 0; y < i; y++){
-			printf("inside the for loop, up to this point cache %d pId is %d at addr %x \n", y, (*caches[y]).getProcessorId(), caches[y]);
-		}
-	}
-	printf("\n");
-	for(int i = 0; i < constants.getNumProcessors(); i++){
-		(*caches[i]).setPId(i);
-	}
-
-	(*caches[0]).setPId(0);
 
 	for(std::vector<Cache*>::iterator it = caches.begin(); it != caches.end(); ++it){
 		printf("%d \n",(*(*it)).getProcessorId());

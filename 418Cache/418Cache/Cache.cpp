@@ -20,26 +20,32 @@ and more.
 */
 
 
-CacheConstants cacheConstants;
-std::vector<CacheSet*> localCache; 
-std::queue<CacheJob*> pendingJobs;
-CacheJob* currentJob;
-BusRequest* busRequest;
-int processorId;
-bool haveBusRequest;
-bool busy;
-unsigned long long startServiceCycle;
-unsigned long long jobCycleCost;
-
-
-
-
 Cache::Cache(int pId, CacheConstants consts, std::queue<CacheJob*>* jobQueue)
 {
 	cacheConstants = consts;
 	//make a vector of the CacheSet 
 	localCache.resize(cacheConstants.getNumSets());
 	for(int i = 0; i < cacheConstants.getNumSets(); i++){
+		localCache[i] = new CacheSet(&consts);
+	}
+	processorId = pId;
+	pendingJobs = *jobQueue;
+	printf("number of pending jobs for cache %d (or is it %d ??) is %d \n", processorId, pId, pendingJobs.size());
+	currentJob = NULL;
+	busRequest = NULL;
+	haveBusRequest = false;
+	busy = false;
+	startServiceCycle = 0;
+	jobCycleCost = 0;
+
+}
+
+void Cache::setThings(int pId, CacheConstants consts, std::queue<CacheJob*>* jobQueue)
+{
+	cacheConstants = consts;
+	//make a vector of the CacheSet 
+	localCache.resize(cacheConstants.getNumSets());
+	for (int i = 0; i < cacheConstants.getNumSets(); i++){
 		localCache[i] = new CacheSet(&consts);
 	}
 	processorId = pId;
@@ -63,9 +69,8 @@ void Cache::setPId(int pid){
 Given an address, and two int*, set the pointer values to the set number and 
 the tag for the address
 */
-void decode_address(unsigned long long address, int* whichSet, int* tag)
+void Cache::decode_address(unsigned long long address, int* whichSet, int* tag)
 {
-
 	int numSetBits = cacheConstants.getNumSetBits();
 	int numBytesBits = cacheConstants.getNumBytesBits();
 	int numTagBits = cacheConstants.getNumAddressBits() - (numSetBits + numBytesBits);
@@ -78,7 +83,7 @@ void decode_address(unsigned long long address, int* whichSet, int* tag)
 
 }
 
-unsigned long long getTotalMemoryCost(int set, int tag)
+unsigned long long Cache::getTotalMemoryCost(int set, int tag)
 {
 	unsigned long long result = cacheConstants.getMemoryResponseCycleCost();
 	CacheSet* currSet = localCache[set]; 
@@ -95,7 +100,7 @@ unsigned long long getTotalMemoryCost(int set, int tag)
 /*
 For a given state, see if the line the current job we are working on is in that state
 */
-bool lineInState(CacheLine::State state){
+bool Cache::lineInState(CacheLine::State state){
 	int set = 0;
 	int tag = 0;
 	decode_address((*currentJob).getAddress(), &set, &tag);
