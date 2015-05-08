@@ -26,6 +26,7 @@ public:
 	int processorId;
 	bool haveBusRequest;
 	bool busy;
+	bool busRequestBeingServiced;
 	unsigned long long startServiceCycle;
 	unsigned long long jobCycleCost;
 

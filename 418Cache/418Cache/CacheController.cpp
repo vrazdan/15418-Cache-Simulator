@@ -56,6 +56,9 @@ int main(int argc, char* argv[]){
 	//keep track of all jobs that the processors have to do
 	std::queue<CacheJob*> outstandingRequests; 
 
+
+	//std::vector<std::queue<CacheJob*>> outstandingRequests (numProcessors);
+
 	char* filename = argv[1];
 	if(filename == NULL){
 		printf("Error, no filename given");
@@ -72,9 +75,40 @@ int main(int argc, char* argv[]){
 		sscanf(line.c_str(), "%c %llx %u", &readWrite, &address, &threadId);
 		accessProcessorId = (threadId % numProcessors);
 		//so accessProcessorId is now the # of the cache that is responsible for the thread
+
 		outstandingRequests.push(new CacheJob(readWrite, address, threadId));
+
+		//outstandingRequests.at(accessProcessorId).push(new CacheJob(readWrite, address, threadId));
+
 		printf("rw:%c addr:%llX threadId:%d \n", readWrite, address, threadId);
 	}
+
+	/*
+	//incorrect scheduler for now...
+
+	for(int i = 0; i < constants.getNumProcessors(); i++){
+	caches.push_back(new Cache(i, constants, &outstandingRequests.at(i), stats));
+	}
+
+	//so now all queues are full with the jobs they need to run
+	bus = new AtomicBusManager(constants, &caches);
+
+	while(!queuesEmpty(caches)){
+	//time must first increment for the constants
+	constants.tick();
+	//then call for all the caches
+	for(int j = 0; j < numProcessors; j++){
+	//printf("trying to tick for cache %d, actually ticking cache %d \n", j, (*caches.at(j)).getProcessorId());
+	(*caches.at(j)).tick();
+	}
+	//then call the bus manager
+	(*bus).tick();
+
+	}
+	*/
+
+
+
 
 	//Creating all of the caches and putting them into the caches vector
 	for(int i = 0; i < constants.getNumProcessors(); i++){
@@ -104,6 +138,7 @@ int main(int argc, char* argv[]){
 		(*bus).tick();
 
 	}
+
 
 	printf("finished at cycle %llu \n", constants.getCycle());
 	printf("num hits: %llu num miss: %llu num flush: %llu num evicts: %llu \n", (*stats).numHit, (*stats).numMiss, (*stats).numFlush, (*stats).numEvict);
