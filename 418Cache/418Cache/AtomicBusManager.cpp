@@ -36,25 +36,24 @@ void AtomicBusManager::tick(){
 	int tempNextCache = -1;
 	//so either not in use, or we just finished a job
 	//loop for all processors starting from next 
-	printf("currentCache in atomicbusmanager is %d \n", currentCache);
 	for(int i = 0; i < constants.getNumProcessors(); i++){
 		if(((caches.at(i)) != NULL) && (*caches.at(i)).hasBusRequest()){
 			//so we will now service this cache
 			currentRequest = (*caches.at(i)).getBusRequest();
 			tempNextCache = i;
-			printf("found a cache to service, it's cache %d \n", tempNextCache);
+			//printf("found a cache to service, it's cache %d \n", tempNextCache);
 			break;
 		}
 	}
 
 	if(tempNextCache == -1){
 		//so there are no more pending requests in the system
-		printf("no one to service, leaving \n");
+		//printf("no one to service, leaving \n");
 		inUse = false;
 		return;
 	}
 	currentCache = tempNextCache;
-	printf("current Cache now just got set to %d \n", currentCache);
+	printf("now servicing cache %d on the bus \n", currentCache);
 
 	//since only get here if we got a new job
 	//update the startCycle for when we just changed jobs
@@ -76,6 +75,8 @@ void AtomicBusManager::tick(){
 					if (result == Cache::FLUSH)
 					{
 						endCycle += constants.getMemoryResponseCycleCost();
+						(*caches[currentCache]).updateEndCycleTime(constants.getMemoryResponseCycleCost());
+						//make sure the cache itself knows that it isn't finished until the proper time
 					}
 					if (result == Cache::SHARED)
 					{

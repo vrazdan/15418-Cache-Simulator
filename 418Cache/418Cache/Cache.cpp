@@ -106,6 +106,7 @@ void Cache::handleRequest(){
 						jobCycleCost = cacheConstants.getCacheHitCycleCost();
 						busy = true;
 						haveBusRequest = false;
+						printf("cache %d just got a cache hit on a PrWr request for address %llx \n", processorId, (*currentJob).getAddress());
 					}
 					else{
 						haveBusRequest = true;
@@ -119,6 +120,8 @@ void Cache::handleRequest(){
 						busRequest = new BusRequest(BusRequest::BusRdX, set, tag,
 							memoryCost);
 						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
+						printf("cache %d just got a cache miss(or was shared) on a PrWr request for address %llx \n", processorId, (*currentJob).getAddress());
+
 					}
 				}
 			}
@@ -130,6 +133,8 @@ void Cache::handleRequest(){
 						busy = true;
 						startServiceCycle = cacheConstants.getCycle();
 						jobCycleCost = cacheConstants.getCacheHitCycleCost();
+						printf("cache %d just got a cache hit on a PrRd request for address %llx \n", processorId, (*currentJob).getAddress());
+
 					}
 					else{
 						//so we need to issue a request for the line
@@ -141,6 +146,8 @@ void Cache::handleRequest(){
 						busRequest = new BusRequest(BusRequest::BusRd, set, tag,
 							cacheConstants.getMemoryResponseCycleCost());
 						jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
+						printf("cache %d just got a cache miss on a PrRd request for address %llx \n", processorId, (*currentJob).getAddress());
+
 					}
 				}
 			}
@@ -155,7 +162,7 @@ bool Cache::hasBusRequest(){
 
 //return the current busRequest 
 BusRequest* Cache::getBusRequest(){
-	printf("cache %d got able to put out a bus request \n", processorId);
+	printf("cache %d got able to put out a bus request for address %llx \n", processorId, (*currentJob).getAddress());
 	startServiceCycle = cacheConstants.getCycle();
 	return busRequest;
 }
@@ -168,6 +175,8 @@ Cache::SnoopResult Cache::snoopBusRequest(BusRequest* request){
 
 	SnoopResult result = NONE;
 	CacheSet* tempSet = localCache[(*request).getSet()];
+	int setNum = (*request).getSet();
+	int tagNum = (*request).getTag();
 	if((*tempSet).hasLine((*request).getTag())){
 		//so we do have this line
 		CacheLine* tempLine = (*tempSet).getLine((*request).getTag());
@@ -178,6 +187,7 @@ Cache::SnoopResult Cache::snoopBusRequest(BusRequest* request){
 				if((*tempLine).getState() == CacheLine::shared){
 					//could have a cache respond with the data needed
 					//but we just let main memory handle it
+					printf("cache number %d just changed set %d and tag %d to from shared to shared from a read \n", processorId, setNum, tagNum);
 					result = Cache::SHARED;
 					return result;
 				}//shared
@@ -185,10 +195,13 @@ Cache::SnoopResult Cache::snoopBusRequest(BusRequest* request){
 					//FLUSH LINE TO MEMORY
 					//and set the state to Shared
 					result = FLUSH;
+					printf("cache %d just flushed set %d and tag %d \n", processorId, setNum, tagNum);
 					(*tempLine).setState(CacheLine::shared);
+					printf("cache number %d just changed set %d and tag %d from modified to shared from a read \n", processorId, setNum, tagNum);
 					return result;
 				}//modified
 				if((*tempLine).getState() == CacheLine::invalid){
+					printf("cache number %d just changed set %d and tag %d from invalid to invalid from a read \n", processorId, setNum, tagNum);
 					//We shouldn't do anything here – the line isn't even in the cache
 					return result;
 				}
@@ -198,17 +211,22 @@ Cache::SnoopResult Cache::snoopBusRequest(BusRequest* request){
 				if((*tempLine).getState() == CacheLine::shared){
 					//invalidate our line
 					(*tempLine).setState(CacheLine::invalid);
+					printf("cache number %d just changed set %d and tag %d from shared to invalid from a ReadX \n", processorId, setNum, tagNum);
+
 					return result;
 				}//shared
 				if((*tempLine).getState() == CacheLine::modified){
 					//FLUSH LINE TO MEMORY
-					//and set the state to Shared
+					//and set the state to invalid
 					result = FLUSH;
+					printf("cache %d just flushed set %d and tag %d \n", processorId, setNum, tagNum);
 					(*tempLine).setState(CacheLine::invalid);
+					printf("cache number %d just changed set %d and tag %d from modified to invalid from a ReadX \n", processorId, setNum, tagNum);
 					return result;
 				}//modified
 				if((*tempLine).getState() == CacheLine::invalid){
 					//We shouldn't do anything here – the line isn't even in the cache
+					printf("cache number %d just changed set %d and tag %d from invalid to invalid from a ReadX \n", processorId, setNum, tagNum);
 					return result;
 				}	
 			}
@@ -217,13 +235,15 @@ Cache::SnoopResult Cache::snoopBusRequest(BusRequest* request){
 	return result;
 }
 
+void Cache::updateEndCycleTime(unsigned long long extraCycleCost){
+	jobCycleCost += extraCycleCost;
+}
 
 
 /*
 Update to store the new line requested
 */
 void Cache::busJobDone(){
-	printf("cache %d has just been told it has finished a job \n", processorId);
 	unsigned long long jobAddr = (*currentJob).getAddress();
 	int currJobSet = 0;
 	int currJobTag = 0;
@@ -257,6 +277,8 @@ void Cache::busJobDone(){
 		//Set the line's state to Shared
 		(*currLine).setState(CacheLine::shared);
 	}
+	printf("cache %d has just been told it has finished a job for address %llx \n", processorId, (*currentJob).getAddress());
+
 }
 
 

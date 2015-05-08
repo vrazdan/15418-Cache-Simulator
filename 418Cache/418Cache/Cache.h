@@ -28,6 +28,7 @@ public:
 	unsigned long long jobCycleCost;
 
 
+	void updateEndCycleTime(unsigned long long);
 	typedef enum {SHARED, FLUSH, NONE} SnoopResult;	 
 	Cache(int, CacheConstants,std::queue<CacheJob*>* );
 	int getProcessorId();

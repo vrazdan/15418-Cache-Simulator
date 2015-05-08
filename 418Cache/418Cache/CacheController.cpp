@@ -28,6 +28,17 @@ bool queuesEmpty(std::vector<Cache*> caches){
 	return allEmpty;
 }
 
+bool noJobs(std::vector<Cache*> caches){
+	bool allEmpty = true;
+	for(int i = 0; i < caches.size(); i++){
+		if((*caches[i]).busy){
+			allEmpty = false;
+		}
+	}
+	return allEmpty;
+
+}
+
 int main(int argc, char* argv[]){
 	CacheConstants constants;
 	//local var so don't have to do an object reference each time
@@ -72,12 +83,14 @@ int main(int argc, char* argv[]){
 	//so now all queues are full with the jobs they need to run
 	bus = new AtomicBusManager(constants, &caches);
 
-	while(!queuesEmpty(caches) && !outstandingRequests.empty()){
+	while(!noJobs(caches) || !outstandingRequests.empty()){
 		//time must first increment for the constants
 		constants.tick();
 		//then call for all the caches
-		if (queuesEmpty(caches))
+		//if (queuesEmpty(caches))
+		if(noJobs(caches))
 		{
+			printf("at cycle %u we process a new job \n", constants.getCycle());
 			CacheJob* currJob = outstandingRequests.front();
 			outstandingRequests.pop();
 			int currThread = (*currJob).getThreadId();
