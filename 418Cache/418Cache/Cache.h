@@ -44,6 +44,7 @@ public:
 	unsigned long long getTotalMemoryCost(int set, int tag);
 	bool lineInState(CacheLine::State state);
 	void setLineState(CacheLine::State state);
+	void updateCurrentJobLineCycle();
 	BusRequest* getBusRequest();
 	Cache::SnoopResult snoopBusRequest(BusRequest*);
 	~Cache(void);
@@ -57,5 +58,20 @@ private:
 	void handleWriteSharedInvalid();
 	bool handleReadHit();
 	void handleReadMiss();
+	Cache::SnoopResult handleSnoopMESI(BusRequest*, int, int, CacheLine*);
+	Cache::SnoopResult handleSnoopMSI(BusRequest*, int, int, CacheLine*);
+
+	Cache::SnoopResult handleBusRdShared(BusRequest*, int, int, CacheLine*);
+	Cache::SnoopResult handleBusRdModified(BusRequest*, int, int, CacheLine*);
+	Cache::SnoopResult handleBusRdInvalid(BusRequest*, int, int, CacheLine*);
+	Cache::SnoopResult handleBusRdXInvalid(BusRequest*, int, int, CacheLine*);
+	Cache::SnoopResult handleBusRdXModified(BusRequest*, int, int, CacheLine*);
+	Cache::SnoopResult handleBusRdXSharedExclusive(BusRequest*, int, int, CacheLine*);
+	Cache::SnoopResult handleBusRdXMESI(BusRequest*, int, int, CacheLine*);
+	Cache::SnoopResult handleBusRdMESI(BusRequest*, int, int, CacheLine*);
+	Cache::SnoopResult handleBusRdXMSI(BusRequest*, int, int, CacheLine*);
+	Cache::SnoopResult handleBusRdMSI(BusRequest*, int, int, CacheLine*);
+
+
 };
 
