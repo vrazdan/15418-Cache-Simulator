@@ -139,7 +139,6 @@ int main(int argc, char* argv[]){
 	//so now all queues are full with the jobs they need to run
 	bus = new AtomicBusManager(constants, &caches);
 
-	//While jobs still exist in any queue
 	while(!noJobs(caches) || !outstandingRequests.empty()){
 		//time must first increment for the constants
 		constants.tick();
