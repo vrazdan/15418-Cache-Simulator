@@ -37,20 +37,19 @@ void AtomicBusManager::tick(){
 
 	int tempNextCache = -1;
 	//so either not in use, or we just finished a job
-	//loop for all processors starting from next 
+	//TODO: actually make this round robin
 	for(int i = 0; i < constants.getNumProcessors(); i++){
 		if(((caches.at(i)) != NULL) && (*caches.at(i)).hasBusRequest()){
 			//so we will now service this cache
 			currentRequest = (*caches.at(i)).getBusRequest();
 			tempNextCache = i;
-			//printf("found a cache to service, it's cache %d \n", tempNextCache);
 			break;
 		}
 	}
 
 	if(tempNextCache == -1){
 		//so there are no more pending requests in the system
-		//printf("no one to service, leaving \n");
+		printf("no one to service, leaving \n");
 		inUse = false;
 		return;
 	}
