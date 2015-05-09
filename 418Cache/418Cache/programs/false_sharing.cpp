@@ -18,6 +18,13 @@ struct Student
   size_t useless_number1;
   size_t useless_number2;
   size_t useless_number3;
+  // size_t useless_number4;
+  // size_t useless_number5;
+  // size_t useless_number6;
+  // size_t useless_number7;
+  // size_t useless_number8;
+  // size_t useless_number9;
+
 };
 Student student_array[NUM_ELEMENTS];
 
@@ -28,14 +35,27 @@ void *access_array(void* tID)
 
    	for (size_t i = 0; i < NUM_ELEMENTS; ++i)
     {
-      if ((size_t)tID == 0)
-        student_array[i].useless_number0 = rand();
-      if ((size_t)tID == 1)
-        student_array[i].useless_number1 = rand();
-      if ((size_t)tID == 2)
-        student_array[i].useless_number2 = rand();
-      if ((size_t)tID == 3)
-        student_array[i].useless_number3 = rand();
+        if ((size_t)tID == 0)
+            student_array[i].useless_number0 = rand();
+        if ((size_t)tID == 1)
+            student_array[i].useless_number1 = rand();
+        if ((size_t)tID == 2)
+            student_array[i].useless_number2 = rand();
+        if ((size_t)tID == 3)
+        //     student_array[i].useless_number3 = rand();
+        // if ((size_t)tID == 4)
+        //     student_array[i].useless_number4 = rand();
+        // if ((size_t)tID == 5)
+        //     student_array[i].useless_number5 = rand();
+        // if ((size_t)tID == 6)
+        //     student_array[i].useless_number6 = rand();
+        // if ((size_t)tID == 7)
+        //     student_array[i].useless_number7 = rand();
+        // if ((size_t)tID == 8)
+        //     student_array[i].useless_number8 = rand();
+        // if ((size_t)tID == 9)
+        //     student_array[i].useless_number9 = rand();
+
    	}
     printf("yay\n");
     thread_counts--;
