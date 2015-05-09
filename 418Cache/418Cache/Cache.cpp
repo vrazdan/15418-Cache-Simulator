@@ -415,6 +415,11 @@ void Cache::updateEndCycleTime(unsigned long long extraCycleCost){
 	jobCycleCost += extraCycleCost;
 }
 
+void Cache::newEndCycleTime(unsigned long long decrease){
+	jobCycleCost = decrease;
+}
+
+
 
 /*
 Update to store the new line requested

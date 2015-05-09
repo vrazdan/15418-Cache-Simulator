@@ -18,6 +18,7 @@ public:
 	int getNumBytesBits();
 	int getNumSetBits();
 	int getNumAddressBits();
+	int getCacheResponseCycleCost();
 
 
 	~CacheConstants(void);

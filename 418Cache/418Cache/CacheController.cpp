@@ -139,11 +139,8 @@ int main(int argc, char* argv[]){
 
 	}
 
-
-
 	printf("finished at cycle %llu \n", constants.getCycle());
 	printf("num hits: %llu num miss: %llu num flush: %llu num evicts: %llu \n", (*stats).numHit, (*stats).numMiss, (*stats).numFlush, (*stats).numEvict);
-
 
 	for(int i = 0; i < numProcessors; i++){
 		delete caches[i];

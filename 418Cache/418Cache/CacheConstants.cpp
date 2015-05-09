@@ -3,6 +3,7 @@
 
 int cacheHitCycleCost;
 int memoryResponseCycleCost;
+int cacheResponseCycleCost;
 int numProcessors;
 
 int numSets;
@@ -33,6 +34,7 @@ CacheConstants::CacheConstants(void)
 {
 	cacheHitCycleCost = 4;
 	memoryResponseCycleCost = 100;
+	cacheResponseCycleCost = 20; 
 	numProcessors = 8; //4 core, hyperthreading
 	numSets = 64;  //totalCacheSize / (numLinesInSet * (numBytesInLine));
 	numSetBits = 6; //2^ 6 = 64
@@ -44,6 +46,11 @@ CacheConstants::CacheConstants(void)
 	cycles = 0;
 	protocol = CacheConstants::MESI;
 }
+
+int CacheConstants::getCacheResponseCycleCost(){
+	return cacheResponseCycleCost;
+}
+
 
 int CacheConstants::getNumAddressBits(){
 	return numAddressBits;
