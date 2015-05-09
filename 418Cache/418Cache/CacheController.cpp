@@ -19,6 +19,26 @@ CacheController::~CacheController(void)
 {
 }
 
+bool jobNoRequireBus(CacheJob* currJob, Cache* cache)
+{
+	int jobTID = (*currJob).getThreadId();
+	unsigned long long jobAddr = (*currJob).getAddress();
+	int whichset;
+	int tag;
+	(*cache).decode_address(jobAddr, &whichset, &tag);
+	CacheSet* currSet = (*cache).localCache[whichset];
+	if (!(*currSet).hasLine(tag))
+		return false;
+	CacheLine* currLine = (*currSet).getLine(tag);
+	if ((*currJob).isWrite())
+	{
+		if (!((*currLine).getState() == CacheLine::modified) && 
+			!((*currLine).getState() == CacheLine::exclusive))
+			return false;
+	}
+	return true;
+}
+
 bool queuesEmpty(std::vector<Cache*> caches){
 	bool allEmpty = true;
 	for(int i = 0; i < caches.size(); i++){
@@ -123,12 +143,12 @@ int main(int argc, char* argv[]){
 		//time must first increment for the constants
 		constants.tick();
 		//then call for all the caches
-		if(noJobs(caches))
+		CacheJob* currJob = outstandingRequests.front();
+		int currThread = (*currJob).getThreadId();
+		if (noJobs(caches) || jobNoRequireBus(currJob, caches[currThread]))
 		{
 			printf("at cycle %llu we process a new job \n", constants.getCycle());
-			CacheJob* currJob = outstandingRequests.front();
 			outstandingRequests.pop();
-			int currThread = (*currJob).getThreadId();
 			((*(caches[currThread])).pendingJobs).push(currJob);
 		}
 		for(int j = 0; j < numProcessors; j++){
@@ -136,7 +156,6 @@ int main(int argc, char* argv[]){
 		}
 		//then call the bus manager
 		(*bus).tick();
-
 	}
 
 

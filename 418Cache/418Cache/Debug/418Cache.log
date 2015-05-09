@@ -1,15 +1,27 @@
-﻿Build started 5/8/2015 8:48:15 PM.
-     1>Project "C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\418Cache\418Cache.vcxproj" on node 2 (Build target(s)).
-       Project file contains ToolsVersion="12.0". This toolset may be unknown or missing, in which case you may be able to resolve this by installing the appropriate version of MSBuild, or the build may have been forced to a particular ToolsVersion for policy reasons. Treating the project as if it had ToolsVersion="4.0". For more information, please see http://go.microsoft.com/fwlink/?LinkId=291333.
+﻿Build started 5/9/2015 7:02:27 PM.
+     1>Project "C:\Users\zhaod_000\Documents\GitHub\15418-Cache-Simulator\418Cache\418Cache\418Cache.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt CacheController.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt AtomicBusManager.cpp Cache.cpp CacheController.cpp
          CacheController.cpp
-     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cachecontroller.cpp(24): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cachecontroller.cpp(34): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cachecontroller.cpp(75): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\stdio.h(311) : see declaration of 'sscanf'
+     1>c:\users\zhaod_000\documents\github\15418-cache-simulator\418cache\418cache\cachecontroller.cpp(44): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\zhaod_000\documents\github\15418-cache-simulator\418cache\418cache\cachecontroller.cpp(54): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\zhaod_000\documents\github\15418-cache-simulator\418cache\418cache\cachecontroller.cpp(95): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\stdio.h(304) : see declaration of 'sscanf'
+         Generating Code...
+         Compiling...
+         Cache.cpp
+     1>c:\users\zhaod_000\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(78): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\zhaod_000\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(93): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\zhaod_000\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(144): warning C4244: 'argument' : conversion from 'unsigned __int64' to 'int', possible loss of data
+     1>c:\users\zhaod_000\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(486): warning C4018: '<' : signed/unsigned mismatch
+         AtomicBusManager.cpp
+         Generating Code...
+     1>c:\users\zhaod_000\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(355): warning C4715: 'Cache::handleSnoopMESI' : not all control paths return a value
+     1>c:\users\zhaod_000\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(388): warning C4715: 'Cache::handleSnoopMSI' : not all control paths return a value
+       ResourceCompile:
+         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\rc.exe /D _UNICODE /D UNICODE /l"0x0409" /nologo /fo"Debug\418Cache.res" 418Cache.rc 
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\Debug\418Cache.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\Debug\418Cache.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\Debug\418Cache.lib" /MACHINE:X86 Debug\418Cache.res
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\zhaod_000\Documents\GitHub\15418-Cache-Simulator\418Cache\Debug\418Cache.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\zhaod_000\Documents\GitHub\15418-Cache-Simulator\418Cache\Debug\418Cache.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\zhaod_000\Documents\GitHub\15418-Cache-Simulator\418Cache\Debug\418Cache.lib" /MACHINE:X86 Debug\418Cache.res
          Debug\AtomicBusManager.obj
          Debug\BusRequest.obj
          Debug\Cache.obj
@@ -19,9 +31,9 @@
          Debug\CacheLine.obj
          Debug\CacheSet.obj
          Debug\CacheStats.obj
-         418Cache.vcxproj -> C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\Debug\418Cache.exe
-     1>Done Building Project "C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\418Cache\418Cache.vcxproj" (Build target(s)).
+         418Cache.vcxproj -> C:\Users\zhaod_000\Documents\GitHub\15418-Cache-Simulator\418Cache\Debug\418Cache.exe
+     1>Done Building Project "C:\Users\zhaod_000\Documents\GitHub\15418-Cache-Simulator\418Cache\418Cache\418Cache.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:01.12
+Time Elapsed 00:00:02.57
