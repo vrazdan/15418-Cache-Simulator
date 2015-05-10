@@ -76,11 +76,11 @@ int main(int argc, char* argv[]){
 		accessProcessorId = (threadId % numProcessors);
 		//so accessProcessorId is now the # of the cache that is responsible for the thread
 
-		outstandingRequests.push(new CacheJob(readWrite, address, threadId));
+		outstandingRequests.push(new CacheJob(readWrite, address, accessProcessorId));
 
 		//outstandingRequests.at(accessProcessorId).push(new CacheJob(readWrite, address, threadId));
 
-		printf("rw:%c addr:%llX threadId:%d \n", readWrite, address, threadId);
+		printf("rw:%c addr:%llX threadId:%d \n", readWrite, address, accessProcessorId);
 	}
 
 	/*

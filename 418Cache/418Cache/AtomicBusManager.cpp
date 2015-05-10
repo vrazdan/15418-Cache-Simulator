@@ -98,9 +98,17 @@ void AtomicBusManager::tick(){
 			if(constants.getProtocol() == CacheConstants::MOESI){
 				if(result == Cache::MODIFIED || result == Cache::EXCLUSIVE || result == Cache::OWNED){
 					//so adjust the cycle cost to a share
-					endCycle -= (constants.getMemoryResponseCycleCost() - constants.getCacheResponseCycleCost());
-					(*caches[currentCache]).newEndCycleTime(constants.getCacheResponseCycleCost());
-					isShared = true;
+					//but don't adjust cost if it was an upgrade from owned to modified, cause that's bad
+					if((*currentRequest).getCycleCost() == constants.getCacheHitCycleCost()){
+						//so was a bus upgrade essentially
+						isShared = true;
+						continue;
+					}
+					else{
+						endCycle -= (constants.getMemoryResponseCycleCost() - constants.getCacheResponseCycleCost());
+						(*caches[currentCache]).newEndCycleTime(constants.getCacheResponseCycleCost());
+						isShared = true;
+					}
 				}
 			}
 			if(constants.getProtocol() == CacheConstants::MESI){
@@ -143,6 +151,7 @@ void AtomicBusManager::tick(){
 	}
 	if(!foundShared && (constants.getProtocol() == CacheConstants::MESI)){
 		//so if we never did get a shared, had to get from main memoryu
+		printf("asdfasdfasdf as \n");
 		(*stats).numMainMemoryUses++;
 	}
 }

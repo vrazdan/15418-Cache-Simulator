@@ -144,7 +144,7 @@ void Cache::handleWriteSharedInvalid(){
 	(*stats).numMiss++;
 	busRequest = new BusRequest(BusRequest::BusRdX, set, tag,
 		memoryCost, (*currentJob).getAddress());
-	jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
+	jobCycleCost = memoryCost;
 	printf("cache %d just got a cache MISS(or was SHARED) on a PrWr request for address %llx at cycle %llu \n", processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
 
 }
@@ -449,7 +449,12 @@ Cache::SnoopResult Cache::handleSnoopMOESI(BusRequest* request, int setNum, int 
 			(*stats).numCacheShare++;
 			(*tempLine).setState(CacheLine::invalid);
 		}
-		else if ((*tempLine).getState() == CacheLine::shared || ((*tempLine).getState() == CacheLine::exclusive)){
+		else if  ((*tempLine).getState() == CacheLine::exclusive){
+			result = Cache::EXCLUSIVE;
+			(*stats).numCacheShare++;
+			(*tempLine).setState(CacheLine::invalid);
+		}
+		else if ((*tempLine).getState() == CacheLine::shared){
 			(*tempLine).setState(CacheLine::invalid);
 			//don't care about result
 		} else{
@@ -525,12 +530,12 @@ void Cache::busJobDone(bool isShared){
 	CacheLine* currLine = (*currSet).getLine(currJobTag); 
 	(*currLine).lastUsedCycle = cacheConstants.getCycle();
 	if((*currentJob).isWrite()){
-		if(isShared &&cacheConstants.getProtocol() == CacheConstants::MOESI){
+		if(isShared && cacheConstants.getProtocol() == CacheConstants::MOESI){
 			//we already calculated if it was a share or not
 			(*currLine).setState(CacheLine::modified);
 			//share in this case means that we got the data from a modified or an owned cache or an exclusive
 		}
-		else if(cacheConstants.getProtocol() == CacheConstants::MOESI){
+		else if (cacheConstants.getProtocol() == CacheConstants::MOESI && (*currLine).getState() != CacheLine::owned){
 			//so it wasn't shared
 			printf("~~~ write was from mem \n");
 			(*stats).numMainMemoryUses++;
@@ -538,12 +543,14 @@ void Cache::busJobDone(bool isShared){
 		}
 		else if(isShared && cacheConstants.getProtocol() == CacheConstants::MESI){
 			(*stats).numCacheShare++;
-			printf("share++ \n");
+			printf("~~~~~~~ share++ \n");
 		}
-		else{
+		else if( cacheConstants.getProtocol() == CacheConstants::MSI){
 			//msi protocol, we had to read from memory
 			(*stats).numMainMemoryUses++;
-			printf("mem use ++ \n");
+			printf("~~~~~~~~~~~~ mem use ++ \n");
+		}
+		else{
 		}
 		(*currLine).setState(CacheLine::modified);
 		printf("cache %d has just been told it has finished a job for address %llx and stored in modified state at cycle %llu \n",
@@ -558,7 +565,7 @@ void Cache::busJobDone(bool isShared){
 			}
 			else{
 				//so we exclusive, and had to get from main memory
-				printf("my read req was exclusive \n");
+				printf("my read req was exclusive ~~~~~~~~~~ \n");
 				(*currLine).setState(CacheLine::exclusive);
 				(*stats).numMainMemoryUses++;
 			}
@@ -581,7 +588,7 @@ void Cache::busJobDone(bool isShared){
 		}
 		if(cacheConstants.getProtocol() == CacheConstants::MSI){
 			(*stats).numMainMemoryUses++;
-			printf("mem++ \n");
+			printf("mem++ ~~~~~~~~~~~~~~~ \n");
 			(*currLine).setState(CacheLine::shared);
 			printf("cache %d has just been told it has finished a job for address %llx and stored in shared state at cycle %llu \n", 
 				processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
