@@ -1,15 +1,22 @@
-﻿Build started 5/9/2015 8:55:53 PM.
+﻿Build started 5/9/2015 10:06:08 PM.
      1>Project "C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\418Cache\418Cache.vcxproj" on node 2 (Build target(s)).
        Project file contains ToolsVersion="12.0". This toolset may be unknown or missing, in which case you may be able to resolve this by installing the appropriate version of MSBuild, or the build may have been forced to a particular ToolsVersion for policy reasons. Treating the project as if it had ToolsVersion="4.0". For more information, please see http://go.microsoft.com/fwlink/?LinkId=291333.
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Cache.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt AtomicBusManager.cpp Cache.cpp CacheController.cpp CacheSet.cpp
+         CacheSet.cpp
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cacheset.cpp(19): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cacheset.cpp(38): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cacheset.cpp(49): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cacheset.cpp(64): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cacheset.cpp(87): warning C4018: '<' : signed/unsigned mismatch
          Cache.cpp
-     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(78): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(93): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(143): warning C4244: 'argument' : conversion from 'unsigned __int64' to 'int', possible loss of data
-     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(495): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(342): warning C4715: 'Cache::handleSnoopMESI' : not all control paths return a value
-     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(375): warning C4715: 'Cache::handleSnoopMSI' : not all control paths return a value
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(146): warning C4244: 'argument' : conversion from 'unsigned __int64' to 'int', possible loss of data
+         Generating Code...
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(345): warning C4715: 'Cache::handleSnoopMESI' : not all control paths return a value
+     1>c:\users\vishnu razdan\documents\github\15418-cache-simulator\418cache\418cache\cache.cpp(378): warning C4715: 'Cache::handleSnoopMSI' : not all control paths return a value
+         Skipping... (no relevant changes detected)
+         CacheController.cpp
+         AtomicBusManager.cpp
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\Debug\418Cache.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\Debug\418Cache.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\Debug\418Cache.lib" /MACHINE:X86 Debug\418Cache.res
          Debug\AtomicBusManager.obj
@@ -26,4 +33,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:04.77
+Time Elapsed 00:00:05.98

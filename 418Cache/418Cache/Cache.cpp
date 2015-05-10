@@ -60,9 +60,12 @@ unsigned long long Cache::getTotalMemoryCost(int set, int tag)
 	CacheSet* currSet = localCache[set]; 
 	if (!(*currSet).hasLine(tag))
 	{
-		if ((*currSet).isFull())
+		//only pay the cycle cost if we have to evict a line with data we care about
+		if ((*currSet).isFull() && (*currSet).evictLineModified())
 		{
 			result = result*2;
+			(*stats).numFlush++;
+			printf("flush from an evict modify \n");
 		}
 	}
 	return result;
@@ -75,7 +78,7 @@ bool Cache::lineInState(CacheLine::State state){
 	int set = 0;
 	int tag = 0;
 	decode_address((*currentJob).getAddress(), &set, &tag);
-	for(int i = 0; i < localCache.size(); i++){
+	for(unsigned int i = 0; i < localCache.size(); i++){
 		if((localCache[i] != NULL) && (*localCache[i]).hasLine(tag)){
 			CacheLine* theLine = (*localCache[i]).getLine(tag);
 			if((*theLine).getState() == state){
@@ -90,7 +93,7 @@ void Cache::setLineState(CacheLine::State state){
 	int set = 0;
 	int tag = 0;
 	decode_address((*currentJob).getAddress(), &set, &tag);
-	for(int i = 0; i < localCache.size(); i++){
+	for(unsigned int i = 0; i < localCache.size(); i++){
 		if((localCache[i] != NULL) && (*localCache[i]).hasLine(tag)){
 			CacheLine* theLine = (*localCache[i]).getLine(tag);
 			(*theLine).setState(state);
@@ -492,7 +495,7 @@ void Cache::updateCurrentJobLineCycle(){
 		return;
 	}
 	decode_address((*currentJob).getAddress(), &set, &tag);
-	for(int i = 0; i < localCache.size(); i++){
+	for(unsigned int i = 0; i < localCache.size(); i++){
 		if((localCache[i] != NULL) && (*localCache[i]).hasLine(tag)){
 			CacheLine* theLine = (*localCache[i]).getLine(tag);
 			(*theLine).lastUsedCycle = cacheConstants.getCycle();

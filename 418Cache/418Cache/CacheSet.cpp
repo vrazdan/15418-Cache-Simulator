@@ -27,8 +27,11 @@ bool CacheSet::isFull()
 }
 
 void CacheSet::addLine(CacheLine* line){
+	if(allLines.size() == (*consts).getNumLinesInSet()){
+		//so have to evict before adding this line
+		evictLRULine();
+	}
 	allLines.push_back(line);
-
 }
 
 bool CacheSet::hasLine(int tag){
@@ -45,10 +48,33 @@ bool CacheSet::hasLine(int tag){
 CacheLine* CacheSet::getLine(int tag){
 	for(int i = 0; i < allLines.size(); i++){
 		if((allLines[i] != NULL) && (*allLines[i]).getTag() == tag){
+			//update when used
+			(*allLines[i]).lastUsedCycle = (*consts).getCycle();
 			return allLines[i];
 		}
 	}
 	return NULL;
+}
+
+//true if the line we're evicting is modified, false otherwise
+bool CacheSet::evictLineModified(){
+	int lineToEvict;
+	unsigned long long leastRecentCycle = ULLONG_MAX;
+
+	for (int i = 0; i < allLines.size(); ++i)
+	{
+		if ((allLines[i] != NULL) && (*allLines[i]).lastUsedCycle < leastRecentCycle)
+		{
+			leastRecentCycle = (*allLines[i]).lastUsedCycle;
+			lineToEvict = i;
+		}
+	}
+	if((*allLines[lineToEvict]).getState() == CacheLine::modified){
+		return true;
+	}
+	else{
+		return false;
+	}
 }
 
 /*

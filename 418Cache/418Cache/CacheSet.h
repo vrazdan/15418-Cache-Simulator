@@ -14,6 +14,7 @@ public:
 	~CacheSet(void);
 	bool isFull();
 	void evictLRULine();
+	bool evictLineModified();
 	void addLine(CacheLine*);
 };
 
