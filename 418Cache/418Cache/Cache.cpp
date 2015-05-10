@@ -173,7 +173,7 @@ void Cache::handleWriteRequestMSI(){
 }
 
 bool Cache::handleReadHit(){
-	if(lineInState(CacheLine::modified) || lineInState(CacheLine::shared) || lineInState(CacheLine::exclusive)){
+	if(lineInState(CacheLine::modified) || lineInState(CacheLine::shared) || lineInState(CacheLine::exclusive) || lineInState(CacheLine::owned)){
 		//cache hit
 		haveBusRequest = false;
 		busy = true;
@@ -237,6 +237,31 @@ void Cache::handleRequest(){
 					handleWriteRequestMESI();
 					return;
 				}
+				if(cacheConstants.getProtocol() == CacheConstants::MOESI){
+					if(lineInState(CacheLine::invalid) || lineInState(CacheLine::shared)){
+						handleWriteSharedInvalid();
+					}
+					else if(lineInState(CacheLine::exclusive)){
+						handleWriteExclusive();
+					}
+					else if(lineInState(CacheLine::modified)){
+						handleWriteModified();
+					}
+					else{
+						//owned, but a hit, but have to make a busreq
+						haveBusRequest = true;
+						busy = true;
+						int set = 0;
+						int tag = 0;
+						decode_address((*currentJob).getAddress(), &set, &tag);
+						//its a hit
+						unsigned long long memoryCost = cacheConstants.getCacheHitCycleCost();
+						(*stats).numHit++;
+						busRequest = new BusRequest(BusRequest::BusRdX, set, tag,
+							memoryCost, (*currentJob).getAddress());
+						jobCycleCost = cacheConstants.getCacheHitCycleCost();
+					}
+				}
 			}
 			if((*currentJob).isRead()){
 				if(cacheConstants.getProtocol() == CacheConstants::MSI){
@@ -245,6 +270,14 @@ void Cache::handleRequest(){
 				if(cacheConstants.getProtocol() == CacheConstants::MESI)
 				{
 					handleReadRequestMESI();					
+				}
+				if(cacheConstants.getProtocol() == CacheConstants::MOESI){
+					if(handleReadHit()){
+						return;
+					}
+					else{
+						handleReadMiss();
+					}
 				}
 			}
 		}
@@ -377,6 +410,55 @@ Cache::SnoopResult Cache::handleSnoopMSI(BusRequest* request, int setNum, int ta
 	}
 }
 
+Cache::SnoopResult Cache::handleSnoopMOESI(BusRequest* request, int setNum, int tagNum, CacheLine* tempLine){
+	Cache::SnoopResult result = Cache::NONE;
+	if((*request).getCommand() == BusRequest::BusRd){
+		if((*tempLine).getState() == CacheLine::owned){
+			//if we have it in owned, we are the one who responds with data
+			//no memory use, cacheshare++, miss++
+			result = Cache::OWNED;
+			(*stats).numCacheShare++;
+		} else if((*tempLine).getState() == CacheLine::modified){
+			//if we have it in modified, we are the ones who respond with data, and change line to owned
+			//no memory use, cacheshare++, miss++
+			(*tempLine).setState(CacheLine::owned);
+			(*stats).numCacheShare++;
+			result = Cache::MODIFIED;
+		}
+		else if ((*tempLine).getState() == CacheLine::shared){
+			//we don't give anything to the req cache cause not our job
+			//they have to go to main memory
+			result = Cache::SHARED;
+		} else if((*tempLine).getState() == CacheLine::exclusive){
+			//change to shared, share the data
+			result = Cache::EXCLUSIVE;
+			(*tempLine).setState(CacheLine::shared);
+			(*stats).numCacheShare++;
+		} else{
+			//so we're invalid, do nothing
+		}
+	}
+	if((*request).getCommand() == BusRequest::BusRdX){
+		if((*tempLine).getState() == CacheLine::owned){
+			result = Cache::OWNED;
+			(*stats).numCacheShare++;
+			(*tempLine).setState(CacheLine::invalid);
+		} else if((*tempLine).getState() == CacheLine::modified){
+			//we only flush when evicted
+			result = Cache::MODIFIED; //there is no flush, but can share the data
+			(*stats).numCacheShare++;
+			(*tempLine).setState(CacheLine::invalid);
+		}
+		else if ((*tempLine).getState() == CacheLine::shared || ((*tempLine).getState() == CacheLine::exclusive)){
+			(*tempLine).setState(CacheLine::invalid);
+			//don't care about result
+		} else{
+			//so we're invalid, do nothing
+		}
+	}
+	return result;
+}
+
 
 /*
 Read the current BusRequest that another cache issued to the bus
@@ -396,6 +478,9 @@ Cache::SnoopResult Cache::snoopBusRequest(BusRequest* request){
 		}
 		if(cacheConstants.getProtocol() == CacheConstants::MSI){
 			return handleSnoopMSI(request, setNum, tagNum, tempLine);
+		}
+		if(cacheConstants.getProtocol() == CacheConstants::MOESI){
+			return handleSnoopMOESI(request, setNum, tagNum, tempLine);
 		}
 	}
 	return result;
@@ -425,7 +510,7 @@ void Cache::busJobDone(bool isShared){
 	CacheSet* currSet = localCache[currJobSet];
 
 	//Need to tell if we need to evict a line from the set
-	bool needToEvict = (*currSet).isFull() && (*currSet).hasLine(currJobTag);
+	bool needToEvict = (*currSet).isFull() && !((*currSet).hasLine(currJobTag));
 	if (needToEvict){
 		(*currSet).evictLRULine();
 		(*stats).numEvict++;
@@ -440,7 +525,18 @@ void Cache::busJobDone(bool isShared){
 	CacheLine* currLine = (*currSet).getLine(currJobTag); 
 	(*currLine).lastUsedCycle = cacheConstants.getCycle();
 	if((*currentJob).isWrite()){
-		if(isShared && cacheConstants.getProtocol() == CacheConstants::MESI){
+		if(isShared &&cacheConstants.getProtocol() == CacheConstants::MOESI){
+			//we already calculated if it was a share or not
+			(*currLine).setState(CacheLine::modified);
+			//share in this case means that we got the data from a modified or an owned cache or an exclusive
+		}
+		else if(cacheConstants.getProtocol() == CacheConstants::MOESI){
+			//so it wasn't shared
+			printf("~~~ write was from mem \n");
+			(*stats).numMainMemoryUses++;
+			(*currLine).setState(CacheLine::modified);
+		}
+		else if(isShared && cacheConstants.getProtocol() == CacheConstants::MESI){
 			(*stats).numCacheShare++;
 			printf("share++ \n");
 		}
@@ -454,6 +550,19 @@ void Cache::busJobDone(bool isShared){
 			processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
 	}
 	if((*currentJob).isRead()){
+		if(cacheConstants.getProtocol() == CacheConstants::MOESI){
+			if(isShared){
+				//so someone was modified or owned or exclusive
+				printf("just got my read request as a share \n");
+				(*currLine).setState(CacheLine::shared);
+			}
+			else{
+				//so we exclusive, and had to get from main memory
+				printf("my read req was exclusive \n");
+				(*currLine).setState(CacheLine::exclusive);
+				(*stats).numMainMemoryUses++;
+			}
+		}
 		if((cacheConstants).getProtocol() == CacheConstants::MESI){
 			if(!isShared){
 				(*currLine).setState(CacheLine::exclusive);

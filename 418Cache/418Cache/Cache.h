@@ -32,7 +32,7 @@ public:
 	CacheLine::State currentBusJobResultState;
 
 	void updateEndCycleTime(unsigned long long);
-	typedef enum {SHARED, FLUSH_MODIFIED_TO_SHARED,FLUSH_MODIFIED_TO_INVALID, OWNED, NONE} SnoopResult;	 
+	typedef enum {SHARED, FLUSH_MODIFIED_TO_SHARED,FLUSH_MODIFIED_TO_INVALID, EXCLUSIVE, OWNED, MODIFIED, NONE} SnoopResult;	 
 	Cache(int, CacheConstants,std::queue<CacheJob*>*, CacheStats*);
 	int getProcessorId();
 	void setPId(int);
@@ -61,6 +61,7 @@ private:
 	void handleReadMiss();
 	Cache::SnoopResult handleSnoopMESI(BusRequest*, int, int, CacheLine*);
 	Cache::SnoopResult handleSnoopMSI(BusRequest*, int, int, CacheLine*);
+	Cache::SnoopResult handleSnoopMOESI(BusRequest*, int, int, CacheLine*);
 	Cache::SnoopResult handleBusRdShared(BusRequest*, int, int, CacheLine*);
 	Cache::SnoopResult handleBusRdModified(BusRequest*, int, int, CacheLine*);
 	Cache::SnoopResult handleBusRdInvalid(BusRequest*, int, int, CacheLine*);

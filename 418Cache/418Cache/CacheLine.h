@@ -3,7 +3,7 @@
 class CacheLine
 {
 public:
-	typedef enum {invalid, shared, modified, exclusive, open} State;
+	typedef enum {invalid, shared, modified, exclusive, owned} State;
 	unsigned long long rawAddress; //raw address that maps to me (ignoring block offset)
 	int setIndex; //what set i'm in
 	int myTag; //unique tag identifier

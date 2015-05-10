@@ -70,6 +70,7 @@ void AtomicBusManager::tick(){
 	for(int i = 0; i < constants.getNumProcessors(); i++){
 		if(i != currentCache){
 			Cache::SnoopResult result = (*caches.at(i)).snoopBusRequest(currentRequest);
+
 			if(constants.getProtocol() == CacheConstants::MSI){
 				{
 					if (result == Cache::FLUSH_MODIFIED_TO_SHARED || result == Cache::FLUSH_MODIFIED_TO_INVALID)
@@ -92,6 +93,14 @@ void AtomicBusManager::tick(){
 						//Do nothing
 						continue;
 					}
+				}
+			}
+			if(constants.getProtocol() == CacheConstants::MOESI){
+				if(result == Cache::MODIFIED || result == Cache::EXCLUSIVE || result == Cache::OWNED){
+					//so adjust the cycle cost to a share
+					endCycle -= (constants.getMemoryResponseCycleCost() - constants.getCacheResponseCycleCost());
+					(*caches[currentCache]).newEndCycleTime(constants.getCacheResponseCycleCost());
+					isShared = true;
 				}
 			}
 			if(constants.getProtocol() == CacheConstants::MESI){
@@ -131,6 +140,10 @@ void AtomicBusManager::tick(){
 			}
 		}
 		//so now all caches have acknowledged the new BusRequest that was issued
+	}
+	if(!foundShared && (constants.getProtocol() == CacheConstants::MESI)){
+		//so if we never did get a shared, had to get from main memoryu
+		(*stats).numMainMemoryUses++;
 	}
 }
 

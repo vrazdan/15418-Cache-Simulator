@@ -16,6 +16,9 @@ CacheSet::CacheSet(CacheConstants* constants)
 
 bool CacheSet::isFull()
 {
+	if(allLines.size() < (*consts).getNumLinesInSet()){
+		return false;
+	}
 	for (int i = 0; i < allLines.size(); ++i)
 	{
 		if (allLines[i] == NULL || ((*allLines[i]).getState() == CacheLine::invalid))
@@ -96,6 +99,7 @@ void CacheSet::evictLRULine()
 			lineToEvict = i;
 		}
 	}
+	printf("rip line %llx \n", (*allLines[lineToEvict]).getAddress());
 	allLines.erase(allLines.begin() + lineToEvict);
 }
 
