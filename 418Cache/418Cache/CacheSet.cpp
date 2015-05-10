@@ -58,8 +58,12 @@ CacheLine* CacheSet::getLine(int tag){
 
 //true if the line we're evicting is modified, false otherwise
 bool CacheSet::evictLineModified(){
-	int lineToEvict;
+	int lineToEvict = 0;
 	unsigned long long leastRecentCycle = ULLONG_MAX;
+
+	if (allLines.size() != (*consts).getNumLinesInSet())
+		return false;
+	printf("handleWriteSharedInvalid\n");
 
 	for (int i = 0; i < allLines.size(); ++i)
 	{

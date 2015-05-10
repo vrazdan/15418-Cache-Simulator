@@ -50,7 +50,7 @@ void AtomicBusManager::tick(){
 
 	if(tempNextCache == -1){
 		//so there are no more pending requests in the system
-		printf("no one to service, leaving \n");
+		//printf("no one to service, leaving \n");
 		inUse = false;
 		isShared = false;
 		return;

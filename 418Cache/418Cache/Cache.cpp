@@ -145,7 +145,7 @@ void Cache::handleWriteSharedInvalid(){
 	busRequest = new BusRequest(BusRequest::BusRdX, set, tag,
 		memoryCost, (*currentJob).getAddress());
 	jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
-	printf("cache %d just got a cache MISS(or was SHARED) on a PrWr request for address %llx at cycle %llu \n", 	processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
+	printf("cache %d just got a cache MISS(or was SHARED) on a PrWr request for address %llx at cycle %llu \n", processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
 
 }
 
