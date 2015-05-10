@@ -74,24 +74,17 @@ void AtomicBusManager::tick(){
 				{
 					if (result == Cache::FLUSH_MODIFIED_TO_SHARED || result == Cache::FLUSH_MODIFIED_TO_INVALID)
 					{
-						//change cost as now when flushing, the req cache can get the data too
-						endCycle += constants.getCacheResponseCycleCost();
-						(*caches[currentCache]).updateEndCycleTime(constants.getCacheResponseCycleCost());
+						//flush to memory, then load from memory
+						endCycle += constants.getMemoryResponseCycleCost();
+						(*caches[currentCache]).updateEndCycleTime(constants.getMemoryResponseCycleCost());
 						//make sure the cache itself knows that it isn't finished until the proper time
-						isShared = true; //so can know got a cache service
 						(*stats).numMainMemoryUses++;
 						printf("num mem use ++ \n");
 						continue;
 					}
 					if (result == Cache::SHARED)
 					{
-						//a line can't be both shared and modified, so in this case
-						//just change the end cycle time to be a cacheresponse and not a memoryresponse
-						if(!foundShared){
-							endCycle -= (constants.getMemoryResponseCycleCost() - constants.getCacheResponseCycleCost());
-							(*caches[currentCache]).newEndCycleTime(constants.getCacheResponseCycleCost());
-							foundShared = true;
-						}
+						//do nothing, no sharing in MSI
 						continue;
 					}
 					if (result == Cache::NONE)

@@ -440,9 +440,14 @@ void Cache::busJobDone(bool isShared){
 	CacheLine* currLine = (*currSet).getLine(currJobTag); 
 	(*currLine).lastUsedCycle = cacheConstants.getCycle();
 	if((*currentJob).isWrite()){
-		if(isShared){
+		if(isShared && cacheConstants.getProtocol() == CacheConstants::MESI){
 			(*stats).numCacheShare++;
 			printf("share++ \n");
+		}
+		else{
+			//msi protocol, we had to read from memory
+			(*stats).numMainMemoryUses++;
+			printf("mem use ++ \n");
 		}
 		(*currLine).setState(CacheLine::modified);
 		printf("cache %d has just been told it has finished a job for address %llx and stored in modified state at cycle %llu \n",
@@ -466,15 +471,8 @@ void Cache::busJobDone(bool isShared){
 			}
 		}
 		if(cacheConstants.getProtocol() == CacheConstants::MSI){
-			//Set the line's state to Shared
-			if(isShared){
-				(*stats).numCacheShare++;
-				printf("share ++ \n");
-			}
-			else{
-				(*stats).numMainMemoryUses++;
-				printf("mem++ \n");
-			}
+			(*stats).numMainMemoryUses++;
+			printf("mem++ \n");
 			(*currLine).setState(CacheLine::shared);
 			printf("cache %d has just been told it has finished a job for address %llx and stored in shared state at cycle %llu \n", 
 				processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
