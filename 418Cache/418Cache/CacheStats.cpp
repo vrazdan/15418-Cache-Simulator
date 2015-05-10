@@ -13,6 +13,10 @@ CacheStats::CacheStats(void)
 	numHit	= 0;
 	numMiss = 0;
 	numEvict = 0;
+	numCacheShare = 0;
+	numMainMemoryUses = 0;
+	numExclusiveToModifiedTransitions = 0;
+	numBusRequests = 0;
 }
 
 

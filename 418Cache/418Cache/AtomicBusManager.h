@@ -2,10 +2,11 @@
 #include "CacheConstants.h"
 #include "Cache.h"
 #include "vector"
+#include "CacheStats.h"
 class AtomicBusManager
 {
 public:
-	AtomicBusManager(CacheConstants, std::vector<Cache*>* );
+	AtomicBusManager(CacheConstants, std::vector<Cache*>* , CacheStats* stats);
 	//current cache that had/has bus access
 	int currentCache;
 	//current bus request being served
@@ -22,6 +23,7 @@ public:
 	std::vector<Cache*> caches;
 	//result of if a line for a busrequest is shared or not
 	bool isShared;
+	CacheStats* stats;
 	void tick(void);
 	~AtomicBusManager(void);
 };

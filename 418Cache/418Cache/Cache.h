@@ -61,7 +61,6 @@ private:
 	void handleReadMiss();
 	Cache::SnoopResult handleSnoopMESI(BusRequest*, int, int, CacheLine*);
 	Cache::SnoopResult handleSnoopMSI(BusRequest*, int, int, CacheLine*);
-
 	Cache::SnoopResult handleBusRdShared(BusRequest*, int, int, CacheLine*);
 	Cache::SnoopResult handleBusRdModified(BusRequest*, int, int, CacheLine*);
 	Cache::SnoopResult handleBusRdInvalid(BusRequest*, int, int, CacheLine*);

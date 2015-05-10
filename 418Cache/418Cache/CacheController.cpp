@@ -117,7 +117,7 @@ int main(int argc, char* argv[]){
 	}
 
 	//so now all queues are full with the jobs they need to run
-	bus = new AtomicBusManager(constants, &caches);
+	bus = new AtomicBusManager(constants, &caches, stats);
 
 	while(!noJobs(caches) || !outstandingRequests.empty()){
 		//time must first increment for the constants
@@ -140,7 +140,8 @@ int main(int argc, char* argv[]){
 	}
 
 	printf("finished at cycle %llu \n", constants.getCycle());
-	printf("num hits: %llu num miss: %llu num flush: %llu num evicts: %llu \n", (*stats).numHit, (*stats).numMiss, (*stats).numFlush, (*stats).numEvict);
+	printf("num hits: %llu num miss: %llu num flush: %llu num evicts: %llu num bus request: %llu num shares: %llu num Ex2Mod: %llu, num main memory use: %llu \n", 
+		(*stats).numHit, (*stats).numMiss, (*stats).numFlush, (*stats).numEvict, (*stats).numBusRequests, (*stats).numCacheShare, (*stats).numExclusiveToModifiedTransitions, (*stats).numMainMemoryUses);
 
 	for(int i = 0; i < numProcessors; i++){
 		delete caches[i];

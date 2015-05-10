@@ -106,8 +106,7 @@ bool Cache::handleWriteModified(){
 		busy = true;
 		haveBusRequest = false;
 		(*stats).numHit++;
-		printf("cache %d just got a cache hit on a PrWr request for address %llx in MODIFIED state at cycle %llu \n", 
-			processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
+		printf("cache %d just got a cache HIT on a PrWr request for address %llx in MODIFIED state at cycle %llu \n", 			processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
 		return true;
 	}
 	return false;
@@ -122,10 +121,10 @@ bool Cache::handleWriteExclusive(){
 		busy = true;
 		haveBusRequest = false;
 		(*stats).numHit++;
+		(*stats).numExclusiveToModifiedTransitions++;
 		//set it to modified state
 		setLineState(CacheLine::modified);
-		printf("cache %d just got a cache hit on a PrWr request for address %llx in EXCLUSIVE state, so changed to MODIFIED state at cycle %llu\n", 
-			processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
+		printf("cache %d just got a cache HIT on a PrWr request for address %llx in EXCLUSIVE state, so changed to MODIFIED state at cycle %llu\n",			processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
 		return true;
 	}
 	return false;
@@ -143,8 +142,7 @@ void Cache::handleWriteSharedInvalid(){
 	busRequest = new BusRequest(BusRequest::BusRdX, set, tag,
 		memoryCost, (*currentJob).getAddress());
 	jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
-	printf("cache %d just got a cache miss(or was shared) on a PrWr request for address %llx at cycle %llu \n", 
-		processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
+	printf("cache %d just got a cache MISS(or was SHARED) on a PrWr request for address %llx at cycle %llu \n", 	processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
 
 }
 
@@ -179,8 +177,7 @@ bool Cache::handleReadHit(){
 		startServiceCycle = cacheConstants.getCycle();
 		jobCycleCost = cacheConstants.getCacheHitCycleCost();
 		(*stats).numHit++;
-		printf("cache %d just got a cache hit on a PrRd request for address %llx at cycle %llu \n",
-			processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
+		printf("cache %d just got a cache HIT on a PrRd request for address %llx at cycle %llu \n",			processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
 		return true;
 	}
 	return false;
@@ -197,8 +194,7 @@ void Cache::handleReadMiss(){
 		cacheConstants.getMemoryResponseCycleCost(), (*currentJob).getAddress());
 	jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
 	(*stats).numMiss++;
-	printf("cache %d just got a cache miss on a PrRd request for address %llx at cycle %llu \n",
-		processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
+	printf("cache %d just got a cache MISS on a PrRd request for address %llx at cycle %llu \n",		processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
 }
 
 void Cache::handleReadRequestMESI(){
@@ -259,33 +255,28 @@ bool Cache::hasBusRequest(){
 
 //return the current busRequest 
 BusRequest* Cache::getBusRequest(){
-	printf("cache %d got able to put out a bus request for address %llx at cycle %llu \n", 
-		processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
+	printf("cache %d got able to put out a bus request for address %llx at cycle %llu \n", 		processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
 	startServiceCycle = cacheConstants.getCycle();
 	busRequestBeingServiced = true;
 	return busRequest;
 }
 
 Cache::SnoopResult Cache::handleBusRdShared(BusRequest* request, int setNum, int tagNum, CacheLine* tempLine){
-	printf("cache number %d just changed set %d and tag %d at address %llx to from shared to shared from a read at cycle %llu \n", 
-		processorId, setNum, tagNum, (*request).address, cacheConstants.getCycle());
+	printf("cache number %d just changed set %d and tag %d at address %llx to from shared to shared from a read at cycle %llu \n", 		processorId, setNum, tagNum, (*request).address, cacheConstants.getCycle());
 	return Cache::SHARED;
-
 }
 
 Cache::SnoopResult Cache::handleBusRdModified(BusRequest* request, int setNum, int tagNum, CacheLine* tempLine){
 	//FLUSH LINE TO MEMORY and set the state to Shared
 	(*stats).numFlush++;
-	printf("cache %d just flushed set %d and tag %d for address %llx \n", processorId, setNum, tagNum, (*request).address);
+	printf("cache %d just FLUSH set %d and tag %d for address %llx \n", processorId, setNum, tagNum, (*request).address);
 	(*tempLine).setState(CacheLine::shared);
-	printf("cache number %d just changed set %d and tag %d for address %llx from modified to shared from a read at cycle %llu \n",
-		processorId, setNum, tagNum, (*request).address, cacheConstants.getCycle());
+	printf("cache number %d just changed set %d and tag %d for address %llx from modified to shared from a read at cycle %llu \n",		processorId, setNum, tagNum, (*request).address, cacheConstants.getCycle());
 	return 	Cache::FLUSH_MODIFIED_TO_SHARED;
 }
 
 Cache::SnoopResult Cache::handleBusRdInvalid(BusRequest* request, int setNum, int tagNum, CacheLine* tempLine){
-	printf("cache number %d does not have set %d and tag %d for address %llx in its cache, ignoring snoop at cycle %llu \n",
-		processorId, setNum, tagNum, (*request).address, cacheConstants.getCycle());
+	printf("cache number %d does not have set %d and tag %d for address %llx in its cache, ignoring snoop at cycle %llu \n",		processorId, setNum, tagNum, (*request).address, cacheConstants.getCycle());
 	return Cache::NONE;
 }
 
@@ -299,8 +290,7 @@ Cache::SnoopResult Cache::handleBusRdMESI(BusRequest* request, int setNum, int t
 	if((*tempLine).getState() == CacheLine::exclusive){
 		//so no need to flush, but now we're not exclusive
 		(*tempLine).setState(CacheLine::shared);
-		printf("cache number %d just changed set %d and tag %d for address %llx from exclusive to shared from a read at cycle %llu \n",
-			processorId, setNum, tagNum, (*request).address, cacheConstants.getCycle());
+		printf("cache number %d just changed set %d and tag %d for address %llx from exclusive to shared from a read at cycle %llu \n",			processorId, setNum, tagNum, (*request).address, cacheConstants.getCycle());
 		return Cache::SHARED;
 	}
 	else{
@@ -309,26 +299,23 @@ Cache::SnoopResult Cache::handleBusRdMESI(BusRequest* request, int setNum, int t
 }
 
 Cache::SnoopResult Cache::handleBusRdXInvalid(BusRequest* request, int setNum, int tagNum, CacheLine* tempLine){
-	printf("cache number %d does not have set %d and tag %d for address %llx in its cache, ignoring snoop at cycle %llu \n",
-		processorId, setNum, tagNum, (*request).address, cacheConstants.getCycle());
+	printf("cache number %d does not have set %d and tag %d for address %llx in its cache, ignoring snoop at cycle %llu \n",		processorId, setNum, tagNum, (*request).address, cacheConstants.getCycle());
 	return Cache::NONE;
 }
 
 Cache::SnoopResult Cache::handleBusRdXModified(BusRequest* request, int setNum, int tagNum, CacheLine* tempLine){
 	//FLUSH LINE TO MEMORY and set the state to invalid
 	(*stats).numFlush++;
-	printf("cache %d just flushed set %d and tag %d \n", processorId, setNum, tagNum);
+	printf("cache %d just FLUSH set %d and tag %d \n", processorId, setNum, tagNum);
 	(*tempLine).setState(CacheLine::invalid);
-	printf("cache number %d just changed set %d and tag %d for address %llx from modified to invalid from a ReadX at cycle %llu \n",
-		processorId, setNum, tagNum, (*request).address, cacheConstants.getCycle());
+	printf("cache number %d just changed set %d and tag %d for address %llx from modified to invalid from a ReadX at cycle %llu \n",		processorId, setNum, tagNum, (*request).address, cacheConstants.getCycle());
 	return FLUSH_MODIFIED_TO_INVALID;
 }
 
 Cache::SnoopResult Cache::handleBusRdXSharedExclusive(BusRequest* request, int setNum, int tagNum, CacheLine* tempLine){
 	//invalidate ours
 	(*tempLine).setState(CacheLine::invalid);
-	printf("cache number %d just changed set %d and tag %d for address %llx from shared (or exclusive) to invalid from a ReadX at cycle %llu \n",
-		processorId, setNum, tagNum, (*request).address, cacheConstants.getCycle());
+	printf("cache number %d just changed set %d and tag %d for address %llx from shared (or exclusive) to invalid from a ReadX at cycle %llu \n",		processorId, setNum, tagNum, (*request).address, cacheConstants.getCycle());
 	return Cache::SHARED;
 }
 
@@ -439,6 +426,7 @@ void Cache::busJobDone(bool isShared){
 	if (needToEvict){
 		(*currSet).evictLRULine();
 		(*stats).numEvict++;
+		printf("just evicted a line \n");
 	}
 
 	if (!(*currSet).hasLine(currJobTag)){
@@ -449,6 +437,10 @@ void Cache::busJobDone(bool isShared){
 	CacheLine* currLine = (*currSet).getLine(currJobTag); 
 	(*currLine).lastUsedCycle = cacheConstants.getCycle();
 	if((*currentJob).isWrite()){
+		if(isShared){
+			(*stats).numCacheShare++;
+			printf("share++ \n");
+		}
 		(*currLine).setState(CacheLine::modified);
 		printf("cache %d has just been told it has finished a job for address %llx and stored in modified state at cycle %llu \n",
 			processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
@@ -457,17 +449,29 @@ void Cache::busJobDone(bool isShared){
 		if((cacheConstants).getProtocol() == CacheConstants::MESI){
 			if(!isShared){
 				(*currLine).setState(CacheLine::exclusive);
+				(*stats).numMainMemoryUses++;
+				printf("main mem ++");
 				printf("cache %d has just been told it has finished a job for address %llx and stored in exclusive state at cycle %llu \n", 
 					processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
 			}
 			else{
 				(*currLine).setState(CacheLine::shared);
+				(*stats).numCacheShare++;
+				printf("share ++ \n");
 				printf("cache %d has just been told it has finished a job for address %llx and stored in shared state at cycle %llu \n", 
 					processorId, (*currentJob).getAddress(), cacheConstants.getCycle());
 			}
 		}
 		if(cacheConstants.getProtocol() == CacheConstants::MSI){
 			//Set the line's state to Shared
+			if(isShared){
+				(*stats).numCacheShare++;
+				printf("share ++ \n");
+			}
+			else{
+				(*stats).numMainMemoryUses++;
+				printf("mem++ \n");
+			}
 			(*currLine).setState(CacheLine::shared);
 			printf("cache %d has just been told it has finished a job for address %llx and stored in shared state at cycle %llu \n", 
 				processorId, (*currentJob).getAddress(), cacheConstants.getCycle());

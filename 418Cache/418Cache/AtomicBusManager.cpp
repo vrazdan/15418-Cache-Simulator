@@ -6,7 +6,7 @@
 #include "BusRequest.h"
 
 
-AtomicBusManager::AtomicBusManager(CacheConstants consts, std::vector<Cache*>* allCaches)
+AtomicBusManager::AtomicBusManager(CacheConstants consts, std::vector<Cache*>* allCaches, CacheStats* statTracker)
 {
 	constants = consts;
 	caches = *allCaches;
@@ -15,6 +15,7 @@ AtomicBusManager::AtomicBusManager(CacheConstants consts, std::vector<Cache*>* a
 	endCycle = 0;
 	inUse = false;
 	isShared = false;
+	stats = statTracker;
 }
 
 //Handle checking if the current BusRequest is completed
@@ -56,7 +57,7 @@ void AtomicBusManager::tick(){
 	}
 	currentCache = tempNextCache;
 	printf("now servicing cache %d on the bus at cycle %llu \n", currentCache, constants.getCycle());
-
+	(*stats).numBusRequests++;
 	//since only get here if we got a new job
 	//update the startCycle for when we just changed jobs
 	startCycle = constants.getCycle();
@@ -77,6 +78,9 @@ void AtomicBusManager::tick(){
 						endCycle += constants.getCacheResponseCycleCost();
 						(*caches[currentCache]).updateEndCycleTime(constants.getCacheResponseCycleCost());
 						//make sure the cache itself knows that it isn't finished until the proper time
+						isShared = true; //so can know got a cache service
+						(*stats).numMainMemoryUses++;
+						printf("num mem use ++ \n");
 						continue;
 					}
 					if (result == Cache::SHARED)
@@ -101,8 +105,11 @@ void AtomicBusManager::tick(){
 				if(result == Cache::FLUSH_MODIFIED_TO_INVALID){
 					endCycle += constants.getCacheResponseCycleCost();
 					(*caches[currentCache]).updateEndCycleTime(constants.getCacheResponseCycleCost());
+					isShared = true;
 					//so requesting cache should set the line to modified
 					//this happens from a busrdx command
+					(*stats).numMainMemoryUses++;
+					printf("num main mem use ++ \n");
 					continue;
 				}
 				if(result == Cache::FLUSH_MODIFIED_TO_SHARED){
@@ -111,6 +118,8 @@ void AtomicBusManager::tick(){
 					(*caches[currentCache]).updateEndCycleTime(constants.getCacheResponseCycleCost());
 					//so tell the cache that it shoudl set the line to shared
 					isShared = true;
+					(*stats).numMainMemoryUses++;
+					printf("num main mem use ++ \n");
 					continue;
 				}
 				if(result == Cache::SHARED){
