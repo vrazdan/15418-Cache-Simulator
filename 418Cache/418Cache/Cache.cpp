@@ -240,15 +240,17 @@ void Cache::handleRequest(){
 				if(cacheConstants.getProtocol() == CacheConstants::MOESI){
 					if(lineInState(CacheLine::invalid) || lineInState(CacheLine::shared)){
 						handleWriteSharedInvalid();
+						return;
 					}
 					else if(lineInState(CacheLine::exclusive)){
 						handleWriteExclusive();
+						return;
 					}
 					else if(lineInState(CacheLine::modified)){
 						handleWriteModified();
+						return;
 					}
-					else{
-						//owned, but a hit, but have to make a busreq
+					else if(lineInState(CacheLine::owned)){
 						haveBusRequest = true;
 						busy = true;
 						int set = 0;
@@ -257,10 +259,14 @@ void Cache::handleRequest(){
 						//its a hit
 						unsigned long long memoryCost = cacheConstants.getCacheHitCycleCost();
 						(*stats).numHit++;
-						busRequest = new BusRequest(BusRequest::BusRdX, set, tag,
-							memoryCost, (*currentJob).getAddress());
+						busRequest = new BusRequest(BusRequest::BusRdX, set, tag,	memoryCost, (*currentJob).getAddress());
 						jobCycleCost = cacheConstants.getCacheHitCycleCost();
 						setLineState(CacheLine::modified);
+						return;
+					}
+					else{
+						handleWriteSharedInvalid();
+						return;
 					}
 				}
 			}

@@ -10,6 +10,8 @@ public:
 	unsigned long long numMainMemoryUses;
 	unsigned long long numExclusiveToModifiedTransitions;
 	unsigned long long numBusRequests;
+	unsigned long long numWrites;
+	unsigned long long numReads;
 	CacheStats(void);
 	~CacheStats(void);
 };

@@ -70,29 +70,24 @@ void AtomicBusManager::tick(){
 	for(int i = 0; i < constants.getNumProcessors(); i++){
 		if(i != currentCache){
 			Cache::SnoopResult result = (*caches.at(i)).snoopBusRequest(currentRequest);
-
 			if(constants.getProtocol() == CacheConstants::MSI){
+				if (result == Cache::FLUSH_MODIFIED_TO_SHARED || result == Cache::FLUSH_MODIFIED_TO_INVALID)
 				{
-					if (result == Cache::FLUSH_MODIFIED_TO_SHARED || result == Cache::FLUSH_MODIFIED_TO_INVALID)
-					{
-						//flush to memory, then load from memory
-						endCycle += constants.getMemoryResponseCycleCost();
-						(*caches[currentCache]).updateEndCycleTime(constants.getMemoryResponseCycleCost());
-						//make sure the cache itself knows that it isn't finished until the proper time
-						(*stats).numMainMemoryUses++;
-						printf("num mem use ++ \n");
-						continue;
-					}
-					if (result == Cache::SHARED)
-					{
-						//do nothing, no sharing in MSI
-						continue;
-					}
-					if (result == Cache::NONE)
-					{
-						//Do nothing
-						continue;
-					}
+					//flush to memory, then load from memory
+					endCycle += constants.getMemoryResponseCycleCost();
+					(*caches[currentCache]).updateEndCycleTime(constants.getMemoryResponseCycleCost());
+					//make sure the cache itself knows that it isn't finished until the proper time
+					(*stats).numMainMemoryUses++;
+					printf("num mem use ++ \n");
+					continue;
+				}
+				if (result == Cache::SHARED){
+					//do nothing, no sharing in MSI
+					continue;
+				}
+				if (result == Cache::NONE){
+					//Do nothing
+					continue;
 				}
 			}
 			if(constants.getProtocol() == CacheConstants::MOESI){
@@ -151,7 +146,6 @@ void AtomicBusManager::tick(){
 	}
 	if(!foundShared && (constants.getProtocol() == CacheConstants::MESI)){
 		//so if we never did get a shared, had to get from main memoryu
-		printf("asdfasdfasdf as \n");
 		(*stats).numMainMemoryUses++;
 	}
 }
