@@ -260,6 +260,7 @@ void Cache::handleRequest(){
 						busRequest = new BusRequest(BusRequest::BusRdX, set, tag,
 							memoryCost, (*currentJob).getAddress());
 						jobCycleCost = cacheConstants.getCacheHitCycleCost();
+						setLineState(CacheLine::modified);
 					}
 				}
 			}
@@ -418,24 +419,29 @@ Cache::SnoopResult Cache::handleSnoopMOESI(BusRequest* request, int setNum, int 
 			//no memory use, cacheshare++, miss++
 			result = Cache::OWNED;
 			(*stats).numCacheShare++;
+			return result;
 		} else if((*tempLine).getState() == CacheLine::modified){
 			//if we have it in modified, we are the ones who respond with data, and change line to owned
 			//no memory use, cacheshare++, miss++
 			(*tempLine).setState(CacheLine::owned);
 			(*stats).numCacheShare++;
 			result = Cache::MODIFIED;
+			return result;
 		}
 		else if ((*tempLine).getState() == CacheLine::shared){
 			//we don't give anything to the req cache cause not our job
 			//they have to go to main memory
 			result = Cache::SHARED;
+			return result;
 		} else if((*tempLine).getState() == CacheLine::exclusive){
 			//change to shared, share the data
 			result = Cache::EXCLUSIVE;
 			(*tempLine).setState(CacheLine::shared);
 			(*stats).numCacheShare++;
+			return result;
 		} else{
 			//so we're invalid, do nothing
+			return result;
 		}
 	}
 	if((*request).getCommand() == BusRequest::BusRdX){
@@ -443,16 +449,19 @@ Cache::SnoopResult Cache::handleSnoopMOESI(BusRequest* request, int setNum, int 
 			result = Cache::OWNED;
 			(*stats).numCacheShare++;
 			(*tempLine).setState(CacheLine::invalid);
+			return result;
 		} else if((*tempLine).getState() == CacheLine::modified){
 			//we only flush when evicted
 			result = Cache::MODIFIED; //there is no flush, but can share the data
 			(*stats).numCacheShare++;
 			(*tempLine).setState(CacheLine::invalid);
+			return result;
 		}
 		else if  ((*tempLine).getState() == CacheLine::exclusive){
 			result = Cache::EXCLUSIVE;
 			(*stats).numCacheShare++;
 			(*tempLine).setState(CacheLine::invalid);
+			return result;
 		}
 		else if ((*tempLine).getState() == CacheLine::shared){
 			(*tempLine).setState(CacheLine::invalid);

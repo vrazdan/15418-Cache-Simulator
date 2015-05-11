@@ -21,7 +21,7 @@ bool CacheSet::isFull()
 	}
 	for (int i = 0; i < allLines.size(); ++i)
 	{
-		if (allLines[i] == NULL || ((*allLines[i]).getState() == CacheLine::invalid))
+		if (allLines[i] == NULL || ((*allLines[i]).getState() != CacheLine::modified))
 		{
 			return false;
 		}
