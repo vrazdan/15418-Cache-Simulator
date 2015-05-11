@@ -1,4 +1,4 @@
-﻿Build started 5/10/2015 9:58:37 PM.
+﻿Build started 5/10/2015 10:28:56 PM.
      1>Project "C:\Users\Vishnu Razdan\Documents\GitHub\15418-Cache-Simulator\418Cache\418Cache\418Cache.vcxproj" on node 2 (Build target(s)).
        Project file contains ToolsVersion="12.0". This toolset may be unknown or missing, in which case you may be able to resolve this by installing the appropriate version of MSBuild, or the build may have been forced to a particular ToolsVersion for policy reasons. Treating the project as if it had ToolsVersion="4.0". For more information, please see http://go.microsoft.com/fwlink/?LinkId=291333.
      1>ClCompile:
@@ -26,4 +26,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.41
+Time Elapsed 00:00:03.96

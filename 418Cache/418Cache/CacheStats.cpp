@@ -17,8 +17,6 @@ CacheStats::CacheStats(void)
 	numMainMemoryUses = 0;
 	numExclusiveToModifiedTransitions = 0;
 	numBusRequests = 0;
-	numReads = 0;
-	numWrites = 0;
 }
 
 
