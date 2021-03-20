@@ -1,4 +1,0 @@
-var searchData=
-[
-  ['hexstr',['hexstr',['../group__MISC__PRINT.html#ga9ce43eeb4573a680cf7028e595ce9bd1',1,'LEVEL_BASE::hexstr(INT64 val, UINT32 width=0)'],['../group__MISC__PRINT.html#gac1f4071e91300efd8f86cb5bfd211a3b',1,'LEVEL_BASE::hexstr(INT32 val, UINT32 width=0)'],['../group__MISC__PRINT.html#ga0f3370efcb29bc0266ea7c8b5dd7f7dc',1,'LEVEL_BASE::hexstr(INT16 val, UINT32 width=0)'],['../group__MISC__PRINT.html#ga80530b49df52a979162d7b7ce57f58f5',1,'LEVEL_BASE::hexstr(UINT64 val, UINT32 width=0)'],['../group__MISC__PRINT.html#ga0c7686b0019dd3818399e640cf5748f5',1,'LEVEL_BASE::hexstr(VOID *p, UINT32 width=0)'],['../group__MISC__PRINT.html#ga52c6530135a604733a4bfb28dcff6cfe',1,'LEVEL_BASE::hexstr(const VOID *p, UINT32 width=0)'],['../group__MISC__PRINT.html#ga598bc2949403c04a458bdd394b2fcd4e',1,'LEVEL_BASE::hexstr(UINT32 val, UINT32 width=0)'],['../group__MISC__PRINT.html#ga93ee50e14a1e657a58c166f4ecbfbfeb',1,'LEVEL_BASE::hexstr(UINT16 val, UINT32 width=0)']]]
-];
