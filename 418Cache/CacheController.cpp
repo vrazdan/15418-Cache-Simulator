@@ -99,12 +99,12 @@ int main(int argc, char* argv[]){
 
 	//so now all queues are full with the jobs they need to run
 
-	bus12 = new AtomicBusManager(constants, &caches12, stats, constants.getPropagationDelaySquareSide());
-	bus13 = new AtomicBusManager(constants, &caches13, stats, constants.getPropagationDelaySquareDiag());
-	bus14 = new AtomicBusManager(constants, &caches14, stats, constants.getPropagationDelaySquareSide());
-	bus23 = new AtomicBusManager(constants, &caches23, stats, constants.getPropagationDelaySquareSide());
-	bus24 = new AtomicBusManager(constants, &caches24, stats, constants.getPropagationDelaySquareDiag());
-	bus34 = new AtomicBusManager(constants, &caches34, stats, constants.getPropagationDelaySquareSide());
+	bus12 = new AtomicBusManager(constants, &caches12, stats, constants.getPropagationDelayRectLength());
+	bus13 = new AtomicBusManager(constants, &caches13, stats, constants.getPropagationDelayRectDiagonal());
+	bus14 = new AtomicBusManager(constants, &caches14, stats, constants.getPropagationDelayRectWidth());
+	bus23 = new AtomicBusManager(constants, &caches23, stats, constants.getPropagationDelayRectWidth());
+	bus24 = new AtomicBusManager(constants, &caches24, stats, constants.getPropagationDelayRectDiagonal());
+	bus34 = new AtomicBusManager(constants, &caches34, stats, constants.getPropagationDelayRectLength());
 
 	while(!noJobs(caches) || !outstandingRequests.empty()){
 		//time must first increment for the constants

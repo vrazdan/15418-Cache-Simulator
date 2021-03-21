@@ -120,7 +120,7 @@ void AtomicBusManager::tick(){
 				}
 				if(result == Cache::FLUSH_MODIFIED_TO_SHARED){
 					//so this happens when there is a busrd req
-					endCycle += constants.getPropagationDelaySquareSide();
+					endCycle += propagationDelay;
 					(*caches[currentCache]).updateEndCycleTime(propagationDelay);
 					//so tell the cache that it shoudl set the line to shared
 					isShared = true;

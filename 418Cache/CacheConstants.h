@@ -18,8 +18,9 @@ public:
 	int getNumBytesBits();
 	int getNumSetBits();
 	int getNumAddressBits();
-	int getPropagationDelaySquareSide();
-	int getPropagationDelaySquareDiag();
+	int getPropagationDelayRectLength();
+	int getPropagationDelayRectWidth();
+	int getPropagationDelayRectDiagonal();
 
 
 	~CacheConstants(void);
