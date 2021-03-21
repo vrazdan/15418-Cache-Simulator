@@ -49,8 +49,9 @@ int main(int argc, char* argv[]){
 	unsigned long long address = 0;
 	unsigned int threadId = 0;
 	std::string line;
-	AtomicBusManager* bus;
-	std::vector<Cache*> caches;
+	AtomicBusManager *bus12, *bus13, *bus14, *bus23, *bus24, *bus34;
+	std::vector<Cache*> caches; // All caches
+	std::vector<Cache*> caches12, caches13, caches14, caches23, caches24, caches34;
 	CacheStats* stats = new CacheStats();
 
 	//keep track of all jobs that the processors have to do
@@ -83,41 +84,27 @@ int main(int argc, char* argv[]){
 		printf("rw:%c addr:%llX threadId:%d \n", readWrite, address, accessProcessorId);
 	}
 
-	/*
-	//incorrect scheduler for now...
-
-	for(int i = 0; i < constants.getNumProcessors(); i++){
-	caches.push_back(new Cache(i, constants, &outstandingRequests.at(i), stats));
-	}
-
-	//so now all queues are full with the jobs they need to run
-	bus = new AtomicBusManager(constants, &caches);
-
-	while(!queuesEmpty(caches)){
-	//time must first increment for the constants
-	constants.tick();
-	//then call for all the caches
-	for(int j = 0; j < numProcessors; j++){
-	//printf("trying to tick for cache %d, actually ticking cache %d \n", j, (*caches.at(j)).getProcessorId());
-	(*caches.at(j)).tick();
-	}
-	//then call the bus manager
-	(*bus).tick();
-
-	}
-	*/
-
-
-
-
 	//Creating all of the caches and putting them into the caches vector
 	for(int i = 0; i < constants.getNumProcessors(); i++){
 		std::queue<CacheJob*> tempQueue;
 		caches.push_back(new Cache(i, constants, &tempQueue, stats));
 	}
 
+	caches12.push_back(caches.at(0)); caches12.push_back(caches.at(1));
+	caches13.push_back(caches.at(0)); caches13.push_back(caches.at(2));
+	caches14.push_back(caches.at(0)); caches14.push_back(caches.at(3));
+	caches23.push_back(caches.at(1)); caches23.push_back(caches.at(2));
+	caches24.push_back(caches.at(1)); caches24.push_back(caches.at(3));
+	caches34.push_back(caches.at(2)); caches34.push_back(caches.at(3));
+
 	//so now all queues are full with the jobs they need to run
-	bus = new AtomicBusManager(constants, &caches, stats);
+
+	bus12 = new AtomicBusManager(constants, &caches12, stats);
+	bus13 = new AtomicBusManager(constants, &caches13, stats);
+	bus14 = new AtomicBusManager(constants, &caches14, stats);
+	bus23 = new AtomicBusManager(constants, &caches23, stats);
+	bus24 = new AtomicBusManager(constants, &caches24, stats);
+	bus34 = new AtomicBusManager(constants, &caches34, stats);
 
 	while(!noJobs(caches) || !outstandingRequests.empty()){
 		//time must first increment for the constants
@@ -134,9 +121,14 @@ int main(int argc, char* argv[]){
 		for(int j = 0; j < numProcessors; j++){
 			(*caches.at(j)).tick();
 		}
-		//then call the bus manager
-		(*bus).tick();
 
+		//then call the bus manager
+		(*bus12).tick();
+		(*bus13).tick();
+		(*bus14).tick();
+		(*bus23).tick();
+		(*bus24).tick();
+		(*bus34).tick();
 	}
 
 	printf("finished at cycle %llu \n", constants.getCycle());

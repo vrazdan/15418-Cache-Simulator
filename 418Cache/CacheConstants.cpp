@@ -35,7 +35,7 @@ CacheConstants::CacheConstants(void)
 	cacheHitCycleCost = 4;
 	memoryResponseCycleCost = 100;
 	cacheResponseCycleCost = 20; 
-	numProcessors = 8; //4 core, hyperthreading
+	numProcessors = 4;
 	numSets = 64;  //totalCacheSize / (numLinesInSet * (numBytesInLine));
 	numSetBits = 6; //2^ 6 = 64
 	numLinesInSet = 8; //8 way associative

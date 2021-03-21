@@ -38,8 +38,8 @@ void AtomicBusManager::tick(){
 
 	int tempNextCache = -1;
 	//so either not in use, or we just finished a job
-	//TODO: actually make this round robin
-	for(int i = 0; i < constants.getNumProcessors(); i++){
+	// < 2 instead of < constants.getNumProcessors() because each link connects 2 procs now
+	for(int i = 0; i < 2; i++){	
 		if(((caches.at(i)) != NULL) && (*caches.at(i)).hasBusRequest()){
 			//so we will now service this cache
 			currentRequest = (*caches.at(i)).getBusRequest();
@@ -67,7 +67,7 @@ void AtomicBusManager::tick(){
 	bool foundShared = false;
 	//so now we have the new currentRequest and currentCache is the cache that asked for that request
 	//so now we broadcast this currentRequest to all the caches other than the one who sent it
-	for(int i = 0; i < constants.getNumProcessors(); i++){
+	for(int i = 0; i < 2; i++){
 		if(i != currentCache){
 			Cache::SnoopResult result = (*caches.at(i)).snoopBusRequest(currentRequest);
 			if(constants.getProtocol() == CacheConstants::MSI){
