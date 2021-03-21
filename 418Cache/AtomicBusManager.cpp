@@ -6,7 +6,7 @@
 #include "BusRequest.h"
 
 
-AtomicBusManager::AtomicBusManager(CacheConstants consts, std::vector<Cache*>* allCaches, CacheStats* statTracker)
+AtomicBusManager::AtomicBusManager(CacheConstants consts, std::vector<Cache*>* allCaches, CacheStats* statTracker, int propagationDelay)
 {
 	constants = consts;
 	caches = *allCaches;
@@ -16,6 +16,7 @@ AtomicBusManager::AtomicBusManager(CacheConstants consts, std::vector<Cache*>* a
 	inUse = false;
 	isShared = false;
 	stats = statTracker;
+	this->propagationDelay = propagationDelay;
 }
 
 //Handle checking if the current BusRequest is completed
@@ -100,16 +101,16 @@ void AtomicBusManager::tick(){
 						continue;
 					}
 					else{
-						endCycle -= (constants.getMemoryResponseCycleCost() - constants.getCacheResponseCycleCost());
-						(*caches[currentCache]).newEndCycleTime(constants.getCacheResponseCycleCost());
+						endCycle -= (constants.getMemoryResponseCycleCost() - propagationDelay);
+						(*caches[currentCache]).newEndCycleTime(propagationDelay);
 						isShared = true;
 					}
 				}
 			}
 			if(constants.getProtocol() == CacheConstants::MESI){
 				if(result == Cache::FLUSH_MODIFIED_TO_INVALID){
-					endCycle += constants.getCacheResponseCycleCost();
-					(*caches[currentCache]).updateEndCycleTime(constants.getCacheResponseCycleCost());
+					endCycle += propagationDelay;
+					(*caches[currentCache]).updateEndCycleTime(propagationDelay);
 					isShared = true;
 					//so requesting cache should set the line to modified
 					//this happens from a busrdx command
@@ -119,8 +120,8 @@ void AtomicBusManager::tick(){
 				}
 				if(result == Cache::FLUSH_MODIFIED_TO_SHARED){
 					//so this happens when there is a busrd req
-					endCycle += constants.getCacheResponseCycleCost();
-					(*caches[currentCache]).updateEndCycleTime(constants.getCacheResponseCycleCost());
+					endCycle += constants.getPropagationDelaySquareSide();
+					(*caches[currentCache]).updateEndCycleTime(propagationDelay);
 					//so tell the cache that it shoudl set the line to shared
 					isShared = true;
 					(*stats).numMainMemoryUses++;
@@ -129,8 +130,8 @@ void AtomicBusManager::tick(){
 				}
 				if(result == Cache::SHARED){
 					if(!foundShared){
-						endCycle -= (constants.getMemoryResponseCycleCost() - constants.getCacheResponseCycleCost());
-						(*caches[currentCache]).newEndCycleTime(constants.getCacheResponseCycleCost());
+						endCycle -= (constants.getMemoryResponseCycleCost() - propagationDelay);
+						(*caches[currentCache]).newEndCycleTime(propagationDelay);
 						foundShared = true;
 					}
 					isShared = true;

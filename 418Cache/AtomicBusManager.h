@@ -6,7 +6,7 @@
 class AtomicBusManager
 {
 public:
-	AtomicBusManager(CacheConstants, std::vector<Cache*>* , CacheStats* stats);
+	AtomicBusManager(CacheConstants, std::vector<Cache*>* , CacheStats* stats, int propagationDelay);
 	//current cache that had/has bus access
 	int currentCache;
 	//current bus request being served
@@ -24,6 +24,7 @@ public:
 	//result of if a line for a busrequest is shared or not
 	bool isShared;
 	CacheStats* stats;
+	int propagationDelay;
 	void tick(void);
 	~AtomicBusManager(void);
 };

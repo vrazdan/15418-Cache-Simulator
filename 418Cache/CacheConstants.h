@@ -18,7 +18,8 @@ public:
 	int getNumBytesBits();
 	int getNumSetBits();
 	int getNumAddressBits();
-	int getCacheResponseCycleCost();
+	int getPropagationDelaySquareSide();
+	int getPropagationDelaySquareDiag();
 
 
 	~CacheConstants(void);

@@ -3,7 +3,8 @@
 
 int cacheHitCycleCost;
 int memoryResponseCycleCost;
-int cacheResponseCycleCost;
+int propagationDelaySquareSide; // Formerly: int cacheResponseCycleCost;
+int propagationDelaySquareDiag; 
 int numProcessors;
 
 int numSets;
@@ -34,7 +35,8 @@ CacheConstants::CacheConstants(void)
 {
 	cacheHitCycleCost = 4;
 	memoryResponseCycleCost = 100;
-	cacheResponseCycleCost = 20; 
+	propagationDelaySquareSide = 20; 
+	propagationDelaySquareDiag = 29;
 	numProcessors = 4;
 	numSets = 64;  //totalCacheSize / (numLinesInSet * (numBytesInLine));
 	numSetBits = 6; //2^ 6 = 64
@@ -47,8 +49,12 @@ CacheConstants::CacheConstants(void)
 	protocol = CacheConstants::MESI;
 }
 
-int CacheConstants::getCacheResponseCycleCost(){
-	return cacheResponseCycleCost;
+int CacheConstants::getPropagationDelaySquareSide(){
+	return propagationDelaySquareSide;
+}
+
+int CacheConstants::getPropagationDelaySquareDiag(){
+	return propagationDelaySquareDiag;
 }
 
 
