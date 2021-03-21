@@ -70,6 +70,11 @@ unsigned long long Cache::getTotalMemoryCost(int set, int tag)
 	}
 	return result;
 }
+unsigned long long Cache::getOrderingTime(){
+	// ordering time = source guarantee time + 2 * worst case propagation delay
+	unsigned long long result = cacheConstants.getCycle() + 2 * cacheConstants.getPropagationDelaySquareDiag();	
+	return result;
+}
 
 /*
 For a given state, see if the line the current job we are working on is in that state
@@ -142,6 +147,7 @@ void Cache::handleWriteSharedInvalid(){
 	//the cycle cost can be changed for different protocols and such
 	unsigned long long memoryCost = getTotalMemoryCost(set, tag);
 	(*stats).numMiss++;
+	// busRequest = new BusRequest(BusRequest::BusRdX, set, tag, memoryCost, (*currentJob).getAddress(), getOrderingTime());
 	busRequest = new BusRequest(BusRequest::BusRdX, set, tag,
 		memoryCost, (*currentJob).getAddress());
 	jobCycleCost = memoryCost;
@@ -193,6 +199,7 @@ void Cache::handleReadMiss(){
 	int set = 0;
 	int tag = 0;
 	decode_address((*currentJob).getAddress(), &set, &tag);
+	//busRequest = new BusRequest(BusRequest::BusRd, set, tag, cacheConstants.getMemoryResponseCycleCost(), (*currentJob).getAddress(), getOrderingTime());
 	busRequest = new BusRequest(BusRequest::BusRd, set, tag,
 		cacheConstants.getMemoryResponseCycleCost(), (*currentJob).getAddress());
 	jobCycleCost = cacheConstants.getMemoryResponseCycleCost();
@@ -259,6 +266,7 @@ void Cache::handleRequest(){
 						//its a hit
 						unsigned long long memoryCost = cacheConstants.getCacheHitCycleCost();
 						(*stats).numHit++;
+						// busRequest = new BusRequest(BusRequest::BusRdX, set, tag,	memoryCost, (*currentJob).getAddress(),getOrderingTime());
 						busRequest = new BusRequest(BusRequest::BusRdX, set, tag,	memoryCost, (*currentJob).getAddress());
 						jobCycleCost = cacheConstants.getCacheHitCycleCost();
 						setLineState(CacheLine::modified);
