@@ -12,6 +12,7 @@
 #include "BusRequest.h"
 #include "CacheLine.h"
 #include "CacheStats.h"
+#include "BusResponse.h"
 
 class Cache
 {
@@ -22,6 +23,10 @@ public:
 	std::queue<CacheJob*> pendingJobs;
 	CacheJob* currentJob;
 	BusRequest* busRequest;
+	// add BusResponse and busResponse queue; 
+	BusResponse* busResponse;
+	std::vector<BusResponse*> responseQueue;
+
 	CacheStats* stats;
 	int processorId;
 	bool haveBusRequest;
@@ -47,10 +52,13 @@ public:
 	void setLineState(CacheLine::State state);
 	void updateCurrentJobLineCycle();
 	BusRequest* getBusRequest();
+	vector<BusResponse*> getBusResponseQueue();
 	Cache::SnoopResult snoopBusRequest(BusRequest*);
 	void newEndCycleTime(unsigned long long);
 	~Cache(void);
 private:
+
+	
 	void handleWriteRequestMESI();
 	void handleReadRequestMESI();
 	void handleWriteRequestMSI();
@@ -73,7 +81,6 @@ private:
 	Cache::SnoopResult handleBusRdMESI(BusRequest*, int, int, CacheLine*);
 	Cache::SnoopResult handleBusRdXMSI(BusRequest*, int, int, CacheLine*);
 	Cache::SnoopResult handleBusRdMSI(BusRequest*, int, int, CacheLine*);
-
 
 };
 

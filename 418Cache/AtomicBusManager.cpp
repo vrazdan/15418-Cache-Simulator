@@ -5,7 +5,6 @@
 #include "CacheJob.h"
 #include "BusRequest.h"
 
-
 AtomicBusManager::AtomicBusManager(CacheConstants consts, std::vector<Cache*>* allCaches, CacheStats* statTracker, int propagationDelay)
 {
 	constants = consts;
@@ -70,6 +69,7 @@ void AtomicBusManager::tick(){
 	//so now we broadcast this currentRequest to all the caches other than the one who sent it
 	for(int i = 0; i < 2; i++){
 		if(i != currentCache){
+			// Add the busResponse 
 			Cache::SnoopResult result = (*caches.at(i)).snoopBusRequest(currentRequest);
 			if(constants.getProtocol() == CacheConstants::MSI){
 				if (result == Cache::FLUSH_MODIFIED_TO_SHARED || result == Cache::FLUSH_MODIFIED_TO_INVALID)
@@ -107,6 +107,7 @@ void AtomicBusManager::tick(){
 					}
 				}
 			}
+
 			if(constants.getProtocol() == CacheConstants::MESI){
 				if(result == Cache::FLUSH_MODIFIED_TO_INVALID){
 					endCycle += propagationDelay;
@@ -150,7 +151,6 @@ void AtomicBusManager::tick(){
 		(*stats).numMainMemoryUses++;
 	}
 }
-
 
 AtomicBusManager::~AtomicBusManager(void){
 }

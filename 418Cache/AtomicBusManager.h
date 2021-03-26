@@ -3,6 +3,8 @@
 #include "Cache.h"
 #include "vector"
 #include "CacheStats.h"
+#include "BusResponse.h"
+
 class AtomicBusManager
 {
 public:

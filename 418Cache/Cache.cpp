@@ -7,6 +7,7 @@
 #include "queue"
 #include "BusRequest.h"
 #include "CacheLine.h"
+#include "BusResponse.h"
 
 /*
 Manages generating busrequests, handles processing of all the processor's requests,
@@ -147,7 +148,8 @@ void Cache::handleWriteSharedInvalid(){
 	//the cycle cost can be changed for different protocols and such
 	unsigned long long memoryCost = getTotalMemoryCost(set, tag);
 	(*stats).numMiss++;
-	// busRequest = new BusRequest(BusRequest::BusRdX, set, tag, memoryCost, (*currentJob).getAddress(), getOrderingTime());
+	//busRequest = new BusRequest(BusRequest::BusRdX, set, tag, memoryCost, (*currentJob).getAddress(), getOrderingTime(),processorId);
+	//the bus request call need to be changed, add ordering time and processorId;
 	busRequest = new BusRequest(BusRequest::BusRdX, set, tag,
 		memoryCost, (*currentJob).getAddress());
 	jobCycleCost = memoryCost;
@@ -502,15 +504,29 @@ Cache::SnoopResult Cache::snoopBusRequest(BusRequest* request){
 		//so we do have this line
 		CacheLine* tempLine = (*tempSet).getLine((*request).getTag());
 		if(cacheConstants.getProtocol() == CacheConstants::MESI){
-			return handleSnoopMESI(request, setNum, tagNum, tempLine);
+			SnoopResult result = handleSnoopMESI(request, setNum, tagNum, tempLine);
+			busResponse = new BusResponse(result, (*busRequest).getOrderingTime(),(*busRequest).getSenderId());
+			responseQueue.push_back(busRequest);
+			return result;
 		}
+
 		if(cacheConstants.getProtocol() == CacheConstants::MSI){
-			return handleSnoopMSI(request, setNum, tagNum, tempLine);
+			SnoopResult result = handleSnoopMSI(request, setNum, tagNum, tempLine);
+			busResponse = new BusResponse(result, (*busRequest).getOrderingTime(),(*busRequest).getSenderId());
+			responseQueue.push_back(busRequest);
+			return result;
 		}
+
 		if(cacheConstants.getProtocol() == CacheConstants::MOESI){
-			return handleSnoopMOESI(request, setNum, tagNum, tempLine);
+			SnoopResult result= handleSnoopMOESI(request, setNum, tagNum, tempLine);
+			busResponse = new BusResponse(result, (*busRequest).getOrderingTime(),(*busRequest).getSenderId());
+			responseQueue.push_back(busRequest);
+			return result;
 		}
 	}
+
+	busResponse = new BusResponse(result, (*busRequest).getOrderingTime(),(*busRequest).getSenderId());
+	responseQueue.push_back(busRequest);
 	return result;
 }
 
@@ -639,6 +655,10 @@ void Cache::updateCurrentJobLineCycle(){
 		}
 	}
 
+}
+
+vector<BusResponse*> Cache::getBusResponseQueue(){
+	return responseQueue;
 }
 
 void Cache::tick(){
