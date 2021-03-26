@@ -26,6 +26,7 @@ public:
 	// add BusResponse and busResponse queue; 
 	BusResponse* busResponse;
 	std::vector<BusResponse*> responseQueue;
+	std::vector<BusRequest*> requestQueue;
 
 	CacheStats* stats;
 	int processorId;
@@ -52,7 +53,8 @@ public:
 	void setLineState(CacheLine::State state);
 	void updateCurrentJobLineCycle();
 	BusRequest* getBusRequest();
-	vector<BusResponse*> getBusResponseQueue();
+	std::vector<BusRequest*> getBusRequestQueue();
+	std::vector<BusResponse*> getBusResponseQueue();
 	Cache::SnoopResult snoopBusRequest(BusRequest*);
 	void newEndCycleTime(unsigned long long);
 	~Cache(void);
